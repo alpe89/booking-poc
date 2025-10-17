@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: booking-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking_dev_password
+      POSTGRES_DB: booking_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U booking']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend API
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    container_name: booking-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: booking
+      DATABASE_PASSWORD: booking_dev_password
+      DATABASE_NAME: booking_db
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./packages/backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start:dev
+
+  # Nuxt 3 Frontend
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: booking-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NUXT_PUBLIC_API_BASE: http://localhost:3000/api
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./packages/frontend:/app
+      - /app/node_modules
+      - /app/.nuxt
+    depends_on:
+      - backend
+    command: npm run dev
+
+  # Swagger UI for API Documentation
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: booking-swagger-ui
+    restart: unless-stopped
+    environment:
+      SWAGGER_JSON: /openapi/openapi.yaml
+      BASE_URL: /
+      DISPLAY_REQUEST_DURATION: 'true'
+      DEEP_LINKING: 'true'
+      TRY_IT_OUT_ENABLED: 'true'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./openapi.yaml:/openapi/openapi.yaml:ro
+
+volumes:
+  postgres-data:
+    driver: local

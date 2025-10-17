@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.nuxt/
+.output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Testing
+coverage/
+.nyc_output/
+test/
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Database (local)
+*.db
+*.sqlite
+postgres-data/
+
+# Temporary files
+.tmp/
+temp/
+*.tmp

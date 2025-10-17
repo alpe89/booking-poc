@@ -1,0 +1,552 @@
+openapi: 3.0.3
+info:
+  title: Booking POC API
+  description: |
+    REST API for a travel booking system with seat availability management and time-limited cart expiration.
+
+    ## Key Features
+    - Browse available travels
+    - Reserve seats with 15-minute expiration
+    - Confirm bookings with fake payment
+    - Real-time availability tracking (max 5 seats per travel)
+
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: http://localhost:3000/api
+    description: Local development API
+
+tags:
+  - name: Travels
+    description: Travel listing and details
+  - name: Bookings
+    description: Booking reservations and confirmations
+
+paths:
+  /api/travels:
+    get:
+      summary: List all travels
+      description: Retrieve a paginated list of available travels
+      tags:
+        - Travels
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Travel'
+                  total:
+                    type: integer
+                    description: Total number of travels
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+              example:
+                data:
+                  - id: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                    slug: "jordan-360"
+                    name: "Jordan 360°"
+                    description: "Jordan 360°: the perfect tour to discover..."
+                    startingDate: "2021-11-01"
+                    endingDate: "2021-11-09"
+                    price: 199900
+                    moods:
+                      nature: 80
+                      relax: 20
+                      history: 90
+                      culture: 30
+                      party: 10
+                total: 3
+                page: 1
+                limit: 10
+
+  /api/travels/{slug}:
+    get:
+      summary: Get travel by slug
+      description: Retrieve detailed information about a specific travel including current availability
+      tags:
+        - Travels
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Travel slug identifier
+          schema:
+            type: string
+          example: jordan-360
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Travel'
+                  availableSeats:
+                    type: integer
+                    description: Number of seats currently available
+                    minimum: 0
+                    maximum: 5
+              example:
+                data:
+                  id: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                  slug: "jordan-360"
+                  name: "Jordan 360°"
+                  description: "Jordan 360°: the perfect tour to discover..."
+                  startingDate: "2021-11-01"
+                  endingDate: "2021-11-09"
+                  price: 199900
+                  moods:
+                    nature: 80
+                    relax: 20
+                    history: 90
+                    culture: 30
+                    party: 10
+                availableSeats: 3
+        '404':
+          description: Travel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Travel not found"
+                message: "No travel found with slug 'jordan-360'"
+
+  /api/bookings/reserve:
+    post:
+      summary: Reserve seats for a travel
+      description: |
+        Create a new booking reservation with pending status.
+        Seats are locked for 15 minutes and must be confirmed via payment.
+
+        **Business Rules:**
+        - Max 5 seats total per travel
+        - Reservation expires after 15 minutes if not confirmed
+        - Email validation required
+        - Seats must be between 1 and 5
+      tags:
+        - Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveBookingRequest'
+            example:
+              travelId: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+              email: "john.doe@example.com"
+              seats: 2
+      responses:
+        '201':
+          description: Booking reserved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Booking'
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 timestamp when the reservation expires
+              example:
+                data:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  travelId: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                  email: "john.doe@example.com"
+                  seats: 2
+                  status: "pending"
+                  totalAmount: 399800
+                  createdAt: "2024-01-15T10:00:00Z"
+                  updatedAt: "2024-01-15T10:00:00Z"
+                expiresAt: "2024-01-15T10:15:00Z"
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidEmail:
+                  value:
+                    error: "Validation error"
+                    message: "Invalid email format"
+                invalidSeats:
+                  value:
+                    error: "Validation error"
+                    message: "Seats must be between 1 and 5"
+                notEnoughSeats:
+                  value:
+                    error: "Not enough seats available"
+                    message: "Only 1 seat(s) available for this travel"
+
+  /api/bookings/{id}:
+    get:
+      summary: Get booking details
+      description: Retrieve booking information including remaining time before expiration
+      tags:
+        - Bookings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Booking UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Booking'
+                  remainingTime:
+                    type: integer
+                    description: Seconds remaining until expiration (null if confirmed/expired)
+                    nullable: true
+              example:
+                data:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  travelId: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                  email: "john.doe@example.com"
+                  seats: 2
+                  status: "pending"
+                  totalAmount: 399800
+                  createdAt: "2024-01-15T10:00:00Z"
+                  updatedAt: "2024-01-15T10:00:00Z"
+                remainingTime: 720
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Cancel booking
+      description: Cancel a pending booking and release reserved seats
+      tags:
+        - Bookings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Booking UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: "Booking cancelled successfully"
+        '400':
+          description: Cannot cancel booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Cannot cancel booking"
+                message: "Only pending bookings can be cancelled"
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/bookings/{id}/confirm:
+    post:
+      summary: Confirm booking with payment
+      description: |
+        Confirm a pending booking by completing fake payment.
+        Booking status changes from 'pending' to 'confirmed' and seats are permanently assigned.
+
+        **Note:** This is a fake payment endpoint for POC purposes.
+      tags:
+        - Bookings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Booking UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentMethod
+              properties:
+                paymentMethod:
+                  type: string
+                  enum:
+                    - fake
+                  description: Payment method (only 'fake' supported in POC)
+            example:
+              paymentMethod: "fake"
+      responses:
+        '200':
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Booking'
+              example:
+                data:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  travelId: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                  email: "john.doe@example.com"
+                  seats: 2
+                  status: "confirmed"
+                  totalAmount: 399800
+                  createdAt: "2024-01-15T10:00:00Z"
+                  updatedAt: "2024-01-15T10:12:00Z"
+        '400':
+          description: Cannot confirm booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                alreadyConfirmed:
+                  value:
+                    error: "Cannot confirm booking"
+                    message: "Booking is already confirmed"
+                expired:
+                  value:
+                    error: "Cannot confirm booking"
+                    message: "Booking has expired"
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Travel:
+      type: object
+      required:
+        - id
+        - slug
+        - name
+        - description
+        - startingDate
+        - endingDate
+        - price
+        - moods
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the travel
+        slug:
+          type: string
+          description: URL-friendly identifier
+          example: jordan-360
+        name:
+          type: string
+          description: Travel name
+          example: "Jordan 360°"
+        description:
+          type: string
+          description: Detailed travel description
+        startingDate:
+          type: string
+          format: date
+          description: Travel start date
+          example: "2021-11-01"
+        endingDate:
+          type: string
+          format: date
+          description: Travel end date
+          example: "2021-11-09"
+        price:
+          type: integer
+          description: Price in cents (e.g., 199900 = €1999.00)
+          minimum: 0
+          example: 199900
+        moods:
+          type: object
+          description: Travel mood scores (0-100)
+          properties:
+            nature:
+              type: integer
+              minimum: 0
+              maximum: 100
+            relax:
+              type: integer
+              minimum: 0
+              maximum: 100
+            history:
+              type: integer
+              minimum: 0
+              maximum: 100
+            culture:
+              type: integer
+              minimum: 0
+              maximum: 100
+            party:
+              type: integer
+              minimum: 0
+              maximum: 100
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Booking:
+      type: object
+      required:
+        - id
+        - travelId
+        - email
+        - seats
+        - status
+        - totalAmount
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the booking
+        travelId:
+          type: string
+          format: uuid
+          description: Reference to the booked travel
+        email:
+          type: string
+          format: email
+          description: Customer email address
+          example: john.doe@example.com
+        seats:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Number of seats reserved
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - expired
+            - cancelled
+          description: |
+            Booking status:
+            - `pending`: Reserved but not yet confirmed (15 min expiration)
+            - `confirmed`: Payment completed, seats assigned
+            - `expired`: Reservation expired after 15 minutes
+            - `cancelled`: User cancelled the reservation
+        totalAmount:
+          type: integer
+          description: Total price in cents (price * seats)
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    ReserveBookingRequest:
+      type: object
+      required:
+        - travelId
+        - email
+        - seats
+      properties:
+        travelId:
+          type: string
+          format: uuid
+          description: ID of the travel to book
+        email:
+          type: string
+          format: email
+          description: Customer email address
+          example: john.doe@example.com
+        seats:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Number of seats to reserve
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details (optional)
+          additionalProperties: true
