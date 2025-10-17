@@ -6,4 +6,4 @@ const app = await NestFactory.create(AppModule);
 const port = parseInt(process.env.PORT ?? '3000', 10);
 await app.listen(port);
 
-console.log(`Application is running on: http://localhost:${port}`);
+console.log(`⚡️ Backend is running on PORT ${port}`);
