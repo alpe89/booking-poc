@@ -111,6 +111,7 @@ services:
   backend:       # NestJS API (port 3000)
   frontend:      # Nuxt 3 App (port 3001)
   swagger-ui:    # API Documentation (port 8080)
+  prisma-studio: # Database Management UI (port 5555)
 ```
 
 ---
@@ -217,6 +218,7 @@ Available services:
 - **Frontend**: <http://localhost:3001>
 - **Backend API**: <http://localhost:3000>
 - **Swagger UI**: <http://localhost:8080>
+- **Prisma Studio**: <http://localhost:5555>
 - **PostgreSQL**: localhost:5432
 
 ### Local Development (without Docker)
@@ -262,6 +264,7 @@ pnpm lint             # Lint all workspaces
 pnpm db:seed          # Seed database with sample data
 pnpm db:migrate       # Run migrations
 pnpm db:reset         # Reset database
+pnpm db:studio        # Open Prisma Studio (GUI for database)
 ```
 
 ### How Workspaces Work
@@ -369,32 +372,33 @@ As required by the specification, the project focuses on:
 - [x] Create monorepo structure with pnpm workspaces
   - [x] `pnpm-workspace.yaml`
   - [x] Root `package.json` with scripts
-  - [ ] `packages/backend` and `packages/frontend` directories
-- [ ] Setup Docker Compose
-  - [x] `docker-compose.yml` with postgres, backend, frontend, swagger ui
-  - [ ] Dockerfile for backend
+  - [x] `packages/backend` and `packages/frontend` directories
+- [x] Setup Docker Compose
+  - [x] `docker-compose.yml` with postgres, backend, frontend, swagger ui, prisma studio
+  - [x] Dockerfile for backend (multi-stage build)
   - [ ] Dockerfile for frontend
-  - [ ] Volume for PostgreSQL persistence
-- [ ] Environment configuration
-  - [ ] `.env.example` files
-  - [ ] `.dockerignore` and `.gitignore`
+  - [x] Volume for PostgreSQL persistence
+- [x] Environment configuration
+  - [x] `.env.example` files
+  - [x] `.dockerignore` and `.gitignore`
 
 ### Phase 2: Backend Implementation (NestJS with DDD structure)
 
-- [ ] Initialize NestJS project in `packages/backend`
-  - [ ] Setup TypeScript strict mode
-  - [ ] Configure ESLint and Prettier
-  - [ ] Create domain modules structure (booking, travel, payment)
-- [ ] Database setup
-  - [ ] Configure Prisma
-  - [ ] Create Prisma schema for `travels` and `bookings`
-  - [ ] Initial migrations
-  - [ ] Seed script with `samples/travels.json`
-- [ ] REST API - Travels
-  - [ ] Controller and Service for travels
-  - [ ] `GET /api/travels` with pagination
-  - [ ] `GET /api/travels/:slug` with availability
-  - [ ] DTO and input validation
+- [x] Initialize NestJS project in `packages/backend`
+  - [x] Setup TypeScript strict mode
+  - [x] Configure ESLint and Prettier
+  - [x] Create domain modules structure (booking, travel, payment)
+  - [x] Configure CORS
+- [x] Database setup
+  - [x] Configure Prisma
+  - [x] Create Prisma schema for `travels` and `bookings`
+  - [x] Initial migrations
+  - [x] Seed script with `samples/travels.json`
+- [x] REST API - Travels
+  - [x] Controller and Service for travels
+  - [x] `GET /api/travels` with pagination
+  - [x] `GET /api/travels/:slug` with availability
+  - [x] DTO and input validation (Zod)
 - [ ] REST API - Bookings
   - [ ] Controller and Service for bookings
   - [ ] `POST /api/bookings/reserve` with transaction
