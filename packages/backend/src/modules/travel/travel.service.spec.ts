@@ -108,7 +108,7 @@ describe('TravelService', () => {
       const travel = mockTravels[0];
       vi.spyOn(prisma.travel, 'findUnique').mockResolvedValue(travel);
       vi.spyOn(prisma.booking, 'aggregate').mockResolvedValue({
-        _sum: { seatsCount: 2 },
+        _sum: { seats: 2 },
         _avg: {},
         _count: {},
         _max: {},
@@ -136,7 +136,7 @@ describe('TravelService', () => {
       const travel = mockTravels[0];
       vi.spyOn(prisma.travel, 'findUnique').mockResolvedValue(travel);
       vi.spyOn(prisma.booking, 'aggregate').mockResolvedValue({
-        _sum: { seatsCount: null },
+        _sum: { seats: null },
         _avg: {},
         _count: {},
         _max: {},

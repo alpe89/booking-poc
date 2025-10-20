@@ -32,14 +32,15 @@ model Travel {
 }
 
 model Booking {
-  id         String        @id @default(uuid())
-  travelId   String
-  email      String
-  seatsCount Int
-  status     BookingStatus @default(PENDING)
-  expiresAt  DateTime?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id          String        @id @default(uuid())
+  travelId    String
+  email       String
+  seats       Int
+  totalAmount Int
+  status      BookingStatus @default(PENDING)
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   travel Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
 

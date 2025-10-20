@@ -41,7 +41,7 @@ export class TravelService {
     }
 
     // Calculate available seats
-    const availableSeats = await this.calculateAvailableSeats(travel.id);
+    const availableSeats = await this.calculateAvailableSeats(travel.id, travel.totalSeats);
 
     return {
       data: travel,
@@ -49,16 +49,7 @@ export class TravelService {
     };
   }
 
-  private async calculateAvailableSeats(travelId: string): Promise<number> {
-    const travel = await this.prisma.travel.findUnique({
-      where: { id: travelId },
-      select: { totalSeats: true },
-    });
-
-    if (travel === null) {
-      return 0;
-    }
-
+  private async calculateAvailableSeats(travelId: string, totalSeats: number): Promise<number> {
     // Count confirmed and pending bookings
     const bookedSeats = await this.prisma.booking.aggregate({
       where: {
@@ -68,11 +59,13 @@ export class TravelService {
         },
       },
       _sum: {
-        seatsCount: true,
+        seats: true,
       },
     });
 
-    const totalBooked = bookedSeats._sum?.seatsCount ?? 0;
-    return Math.max(0, travel.totalSeats - totalBooked);
+    const { _sum: seatsSum } = bookedSeats;
+    const totalBooked = seatsSum?.seats ?? 0;
+
+    return Math.max(0, totalSeats - totalBooked);
   }
 }
