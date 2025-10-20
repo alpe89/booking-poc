@@ -1,7 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { z } from 'zod';
 import { TravelService } from './travel.service.js';
-import { GetTravelsQuery, GetTravelsQuerySchema } from './dto/travel.dto.js';
+import type { GetTravelsQuery } from './dto/travel.dto.js';
+import { GetTravelsQuerySchema } from './dto/travel.dto.js';
 import { ZodQuery } from '../../shared/decorators/zod-query.decorator.js';
 import { ZodParam } from '../../shared/decorators/zod-param.decorator.js';
 

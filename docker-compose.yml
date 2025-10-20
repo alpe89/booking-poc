@@ -19,21 +19,17 @@ services:
   # NestJS Backend API
   backend:
     build:
-      context: ./packages/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
     container_name: booking-backend
     restart: unless-stopped
     env_file:
       - .env
     ports:
       - '${PORT:-3000}:3000'
-    volumes:
-      - ./packages/backend:/app
-      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
-    command: npm run start:dev
 
   # Nuxt 3 Frontend
   frontend:
@@ -69,6 +65,24 @@ services:
       - '8080:8080'
     volumes:
       - ./openapi.yaml:/openapi/openapi.yaml:ro
+
+  # Prisma Studio for Database Management
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+      target: builder
+    container_name: booking-prisma-studio
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '5555:5555'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /app/packages/backend
+    command: pnpm prisma studio --port 5555 --browser none
 
 volumes:
   postgres-data:
