@@ -6,7 +6,11 @@ import { GetTravelsQuerySchema } from './dto/travel.dto.js';
 import { ZodQuery } from '../../shared/decorators/zod-query.decorator.js';
 import { ZodParam } from '../../shared/decorators/zod-param.decorator.js';
 
-const SlugSchema = z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens');
+const SlugSchema = z
+  .string()
+  .min(1)
+  .max(255)
+  .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens');
 
 @Controller('api/travels')
 export class TravelController {

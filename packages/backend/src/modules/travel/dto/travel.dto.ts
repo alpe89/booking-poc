@@ -10,7 +10,7 @@ export type GetTravelsQuery = z.infer<typeof GetTravelsQuerySchema>;
 
 // Response schema for GET /api/travels
 export const TravelSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   slug: z.string(),
   name: z.string(),
   description: z.string(),

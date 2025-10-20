@@ -474,6 +474,7 @@ As required by the specification, the project focuses on:
 - [ ] GraphQL Layer on top of REST API
 - [ ] Real-time availability updates (WebSocket)
 - [ ] Email notifications (confirmation, expiration reminder)
+- [ ] Functional programming library (purify-ts, fp-ts, or effect-ts)
 - [ ] i18n (Italian/English)
 - [ ] Rate limiting and throttling
 - [ ] Caching layer (Redis)
