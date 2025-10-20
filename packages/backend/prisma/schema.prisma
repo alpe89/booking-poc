@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+model Travel {
+  id           String    @id @default(uuid())
+  slug         String    @unique
+  name         String
+  description  String    @db.Text
+  startingDate DateTime  @db.Date
+  endingDate   DateTime  @db.Date
+  price        Int
+  moods        Json      // Moods type: { nature, relax, history, culture, party }
+  totalSeats   Int       @default(5)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  bookings Booking[]
+
+  @@index([slug])
+  @@map("travels")
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  travelId   String
+  email      String
+  seatsCount Int
+  status     BookingStatus @default(PENDING)
+  expiresAt  DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  travel Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
+
+  @@index([travelId, status])
+  @@index([expiresAt])
+  @@index([email])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  EXPIRED
+  CANCELLED
+}

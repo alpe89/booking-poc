@@ -115,6 +115,29 @@ services:
 
 ---
 
+## 12-Factor App Methodology
+
+This project follows the [12-Factor App](https://12factor.net/) methodology for building modern, scalable SaaS applications.
+
+### Conformance Status
+
+| Factor | Status | Implementation |
+|--------|--------|----------------|
+| **I. Codebase** | ✅ | Single Git repository with monorepo structure |
+| **II. Dependencies** | ✅ | Explicit declaration via `package.json`, isolated environments via Docker |
+| **III. Config** | ✅ | Environment variables for all config (`.env` files, never committed) |
+| **IV. Backing services** | ✅ | PostgreSQL as attachable resource via connection string |
+| **V. Build, release, run** | ✅ | Strict separation: `pnpm build` → Docker image → `docker-compose up` |
+| **VI. Processes** | ✅ | Stateless NestJS app, state in PostgreSQL |
+| **VII. Port binding** | ✅ | Self-contained services exposing ports (3000, 3001, 5432, 8080) |
+| **VIII. Concurrency** | ✅ | Horizontal scaling via process model (Docker replicas) |
+| **IX. Disposability** | ✅ | Fast startup (<5s), graceful shutdown with NestJS lifecycle |
+| **X. Dev/prod parity** | ✅ | Same stack (Node.js, PostgreSQL, Docker) across environments |
+| **XI. Logs** | ✅ | Logs to stdout/stderr, aggregated by Docker |
+| **XII. Admin processes** | ✅ | One-off processes for migrations (`pnpm db:migrate`) and seeding |
+
+---
+
 ## Database Schema
 
 **Core entities:** `travels` and `bookings`
