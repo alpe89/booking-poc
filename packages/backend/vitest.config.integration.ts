@@ -15,7 +15,18 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['**/*.spec.ts', '**/*.e2e-spec.ts'],
+    // Only run integration tests
+    include: ['**/*.integration.spec.ts'],
+    // Run tests sequentially to avoid database conflicts
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
+    // Longer timeout for integration tests
+    testTimeout: 30000,
+    hookTimeout: 30000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

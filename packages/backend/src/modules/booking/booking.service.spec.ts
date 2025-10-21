@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ConflictException } from '@nestjs/common';
 import { BookingService } from './booking.service.js';
-import { PrismaService } from '../../shared/prisma/prisma.service.js';
-import { BookingStatus } from '../../../generated/prisma/index.js';
+import { PrismaService } from '@shared/prisma/prisma.service.js';
+import { PaymentService } from '../payment/payment.service.js';
+import { BookingStatus, PaymentStatus } from '../../../generated/prisma/index.js';
 
 describe('BookingService', () => {
   let service: BookingService;
   let prisma: PrismaService;
+  let paymentService: PaymentService;
 
   const mockBookings = [
     {
@@ -63,7 +65,28 @@ describe('BookingService', () => {
         create: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
+        aggregate: vi.fn(),
       },
+      payment: {
+        create: vi.fn(),
+      },
+      $transaction: vi.fn((arg) => {
+        // If it's a callback, execute it with mockPrismaService
+        if (typeof arg === 'function') {
+          return arg(mockPrismaService);
+        }
+        // If it's an array of promises, resolve them
+        return Promise.all(arg);
+      }),
+      $queryRaw: vi.fn(),
+    };
+
+    const mockPaymentService = {
+      processFakePayment: vi.fn().mockResolvedValue({
+        success: true,
+        transactionId: 'TXN_123456',
+        errorCode: null,
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -73,11 +96,16 @@ describe('BookingService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: PaymentService,
+          useValue: mockPaymentService,
+        },
       ],
     }).compile();
 
     service = module.get<BookingService>(BookingService);
     prisma = module.get<PrismaService>(PrismaService);
+    paymentService = module.get<PaymentService>(PaymentService);
   });
 
   describe('findById', () => {
@@ -188,6 +216,189 @@ describe('BookingService', () => {
 
       expect(result.data.status).toBe(BookingStatus.PENDING);
       expect(result.remainingTime).toBeNull();
+    });
+  });
+
+  describe('reserve', () => {
+    const mockTravel = {
+      id: 'd408be33-aa6a-4c73-a2c8-58a70ab2ba4d',
+      totalSeats: 5,
+      price: 199900,
+    };
+
+    it('should successfully reserve a booking when seats are available', async () => {
+      const reserveDto = {
+        travelId: 'd408be33-aa6a-4c73-a2c8-58a70ab2ba4d',
+        email: 'new@example.com',
+        seats: 2,
+      };
+
+      vi.spyOn(prisma, '$queryRaw').mockResolvedValue([mockTravel]);
+      vi.spyOn(prisma.booking, 'aggregate').mockResolvedValue({
+        _sum: { seats: 2 },
+        _avg: {},
+        _count: {},
+        _max: {},
+        _min: {},
+      });
+      vi.spyOn(prisma.booking, 'create').mockResolvedValue({
+        ...mockBookings[0],
+        ...reserveDto,
+        totalAmount: 399800,
+      });
+
+      const result = await service.reserve(reserveDto);
+
+      expect(result).toHaveProperty('data');
+      expect(result).toHaveProperty('expiresAt');
+      expect(result.data.seats).toBe(2);
+      expect(result.data.totalAmount).toBe(399800);
+      expect(typeof result.expiresAt).toBe('string');
+    });
+
+    it('should throw NotFoundException when travel does not exist', async () => {
+      const reserveDto = {
+        travelId: 'non-existent-id',
+        email: 'test@example.com',
+        seats: 2,
+      };
+
+      vi.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+
+      await expect(service.reserve(reserveDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException when not enough seats available', async () => {
+      const reserveDto = {
+        travelId: 'd408be33-aa6a-4c73-a2c8-58a70ab2ba4d',
+        email: 'test@example.com',
+        seats: 4,
+      };
+
+      vi.spyOn(prisma, '$queryRaw').mockResolvedValue([mockTravel]);
+      vi.spyOn(prisma.booking, 'aggregate').mockResolvedValue({
+        _sum: { seats: 3 },
+        _avg: {},
+        _count: {},
+        _max: {},
+        _min: {},
+      });
+
+      await expect(service.reserve(reserveDto)).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('confirm', () => {
+    it('should successfully confirm a PENDING booking', async () => {
+      const pendingBooking = {
+        ...mockBookings[0],
+        expiresAt: new Date(Date.now() + 60000),
+      };
+
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(pendingBooking);
+      vi.spyOn(prisma.booking, 'update').mockResolvedValue({
+        ...pendingBooking,
+        status: BookingStatus.CONFIRMED,
+        expiresAt: null,
+      });
+      vi.spyOn(prisma.payment, 'create').mockResolvedValue({
+        id: 'payment-id',
+        bookingId: pendingBooking.id,
+        amount: pendingBooking.totalAmount,
+        status: PaymentStatus.SUCCESS,
+        transactionId: 'TXN_123456',
+        cardLast4: 'FAKE',
+        errorCode: null,
+        createdAt: new Date(),
+      });
+
+      const result = await service.confirm(pendingBooking.id, { paymentMethod: 'fake' });
+
+      expect(result).toHaveProperty('data');
+      expect(result.data.status).toBe(BookingStatus.CONFIRMED);
+      expect(paymentService.processFakePayment).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when booking does not exist', async () => {
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(null);
+
+      await expect(service.confirm('non-existent-id', { paymentMethod: 'fake' })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ConflictException when booking is already CONFIRMED', async () => {
+      const confirmedBooking = mockBookings[1];
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(confirmedBooking);
+
+      await expect(
+        service.confirm(confirmedBooking.id, { paymentMethod: 'fake' }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw ConflictException when booking has expired', async () => {
+      const expiredBooking = {
+        ...mockBookings[0],
+        expiresAt: new Date(Date.now() - 1000),
+      };
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(expiredBooking);
+      vi.spyOn(prisma.booking, 'update').mockResolvedValue({
+        ...expiredBooking,
+        status: BookingStatus.EXPIRED,
+      });
+
+      await expect(service.confirm(expiredBooking.id, { paymentMethod: 'fake' })).rejects.toThrow(
+        ConflictException,
+      );
+    });
+  });
+
+  describe('cancel', () => {
+    it('should successfully cancel a PENDING booking', async () => {
+      const pendingBooking = mockBookings[0];
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(pendingBooking);
+      vi.spyOn(prisma.booking, 'update').mockResolvedValue({
+        ...pendingBooking,
+        status: BookingStatus.CANCELLED,
+      });
+
+      const result = await service.cancel(pendingBooking.id);
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Booking cancelled successfully',
+      });
+      expect(prisma.booking.update).toHaveBeenCalledWith({
+        where: { id: pendingBooking.id },
+        data: { status: BookingStatus.CANCELLED },
+      });
+    });
+
+    it('should throw NotFoundException when booking does not exist', async () => {
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(null);
+
+      await expect(service.cancel('non-existent-id')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ConflictException when booking is not PENDING', async () => {
+      const confirmedBooking = mockBookings[1];
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(confirmedBooking);
+
+      await expect(service.cancel(confirmedBooking.id)).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw ConflictException when trying to cancel EXPIRED booking', async () => {
+      const expiredBooking = mockBookings[2];
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(expiredBooking);
+
+      await expect(service.cancel(expiredBooking.id)).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw ConflictException when trying to cancel CANCELLED booking', async () => {
+      const cancelledBooking = mockBookings[3];
+      vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(cancelledBooking);
+
+      await expect(service.cancel(cancelledBooking.id)).rejects.toThrow(ConflictException);
     });
   });
 });

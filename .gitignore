@@ -54,3 +54,7 @@ temp/
 
 # Prisma
 *.db-journal
+
+# API Testing
+insomnia-collection.json
+thunder-tests/

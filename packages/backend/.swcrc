@@ -19,7 +19,12 @@
     },
     "target": "es2022",
     "keepClassNames": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@modules/*": ["modules/*"],
+      "@/*": ["*"]
+    }
   },
   "minify": false,
   "sourceMaps": true

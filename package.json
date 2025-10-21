@@ -16,5 +16,11 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^10.0.0"
   }
 }

@@ -1,7 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
+import { ZodExceptionFilter } from './shared/filters/zod-exception.filter.js';
 
 const app = await NestFactory.create(AppModule);
+
+// Register global exception filters
+app.useGlobalFilters(new ZodExceptionFilter());
 
 // Enable CORS for frontend and Swagger UI
 const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
@@ -9,6 +13,7 @@ const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
   'http://localhost:3000',
   'http://localhost:8080',
 ];
+
 app.enableCors({
   origin: corsOrigins,
   credentials: true,

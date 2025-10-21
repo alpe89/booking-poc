@@ -55,23 +55,11 @@ paths:
             default: 10
       responses:
         '200':
-          description: Successful response
+          description: Successful response with paginated travel list
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Travel'
-                  total:
-                    type: integer
-                    description: Total number of travels
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
+                $ref: '#/components/schemas/TravelListResponse'
               example:
                 data:
                   - id: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
@@ -87,9 +75,10 @@ paths:
                       history: 90
                       culture: 30
                       party: 10
-                total: 3
-                page: 1
-                limit: 10
+                meta:
+                  total: 3
+                  page: 1
+                  limit: 10
 
   /api/travels/{slug}:
     get:
@@ -107,19 +96,11 @@ paths:
           example: jordan-360
       responses:
         '200':
-          description: Successful response
+          description: Successful response with travel details and availability
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Travel'
-                  availableSeats:
-                    type: integer
-                    description: Number of seats currently available
-                    minimum: 0
-                    maximum: 5
+                $ref: '#/components/schemas/TravelDetailResponse'
               example:
                 data:
                   id: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
@@ -135,7 +116,8 @@ paths:
                     history: 90
                     culture: 30
                     party: 10
-                availableSeats: 3
+                meta:
+                  availableSeats: 3
         '404':
           description: Travel not found
           content:
@@ -176,14 +158,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Booking'
-                  expiresAt:
-                    type: string
-                    format: date-time
-                    description: ISO 8601 timestamp when the reservation expires
+                $ref: '#/components/schemas/BookingReserveResponse'
               example:
                 data:
                   id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -194,7 +169,8 @@ paths:
                   totalAmount: 399800
                   createdAt: "2024-01-15T10:00:00Z"
                   updatedAt: "2024-01-15T10:00:00Z"
-                expiresAt: "2024-01-15T10:15:00Z"
+                meta:
+                  expiresAt: "2024-01-15T10:15:00Z"
         '400':
           description: Bad request - validation error
           content:
@@ -231,18 +207,11 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Successful response
+          description: Successful response with booking details
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Booking'
-                  remainingTime:
-                    type: integer
-                    description: Seconds remaining until expiration (null if confirmed/expired)
-                    nullable: true
+                $ref: '#/components/schemas/BookingDetailResponse'
               example:
                 data:
                   id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -253,7 +222,8 @@ paths:
                   totalAmount: 399800
                   createdAt: "2024-01-15T10:00:00Z"
                   updatedAt: "2024-01-15T10:00:00Z"
-                remainingTime: 720
+                meta:
+                  remainingTime: 720
         '404':
           description: Booking not found
           content:
@@ -280,14 +250,17 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
+                $ref: '#/components/schemas/BookingCancelResponse'
               example:
-                success: true
+                data:
+                  id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  travelId: "d408be33-aa6a-4c73-a2c8-58a70ab2ba4d"
+                  email: "john.doe@example.com"
+                  seats: 2
+                  status: "cancelled"
+                  totalAmount: 399800
+                  createdAt: "2024-01-15T10:00:00Z"
+                  updatedAt: "2024-01-15T10:15:00Z"
                 message: "Booking cancelled successfully"
         '400':
           description: Cannot cancel booking
@@ -340,15 +313,12 @@ paths:
             example:
               paymentMethod: "fake"
       responses:
-        '200':
-          description: Booking confirmed successfully
+        '201':
+          description: Booking confirmed successfully and payment created
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Booking'
+                $ref: '#/components/schemas/BookingConfirmResponse'
               example:
                 data:
                   id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -359,6 +329,11 @@ paths:
                   totalAmount: 399800
                   createdAt: "2024-01-15T10:00:00Z"
                   updatedAt: "2024-01-15T10:12:00Z"
+                meta:
+                  payment:
+                    transactionId: "fake_txn_1234567890"
+                    status: "completed"
+                    errorCode: null
         '400':
           description: Cannot confirm booking
           content:
@@ -550,3 +525,154 @@ components:
           type: object
           description: Additional error details (optional)
           additionalProperties: true
+
+    # ============================================================================
+    # STANDARDIZED RESPONSE WRAPPERS
+    # ============================================================================
+    # All API responses follow a consistent structure with a 'data' field
+    # and optional 'meta' field for additional information
+
+    PaginationMeta:
+      type: object
+      description: Pagination metadata
+      required:
+        - total
+        - page
+        - limit
+      properties:
+        total:
+          type: integer
+          description: Total number of items across all pages
+          example: 42
+        page:
+          type: integer
+          description: Current page number
+          minimum: 1
+          example: 1
+        limit:
+          type: integer
+          description: Number of items per page
+          minimum: 1
+          maximum: 100
+          example: 10
+
+    TravelListResponse:
+      type: object
+      description: Standardized response for travel list
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Travel'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    TravelDetailResponse:
+      type: object
+      description: Standardized response for single travel
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/Travel'
+        meta:
+          type: object
+          required:
+            - availableSeats
+          properties:
+            availableSeats:
+              type: integer
+              description: Number of seats currently available for this travel
+              minimum: 0
+              maximum: 5
+              example: 3
+
+    BookingReserveResponse:
+      type: object
+      description: Standardized response for booking reservation
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+        meta:
+          type: object
+          required:
+            - expiresAt
+          properties:
+            expiresAt:
+              type: string
+              format: date-time
+              description: ISO 8601 timestamp when the reservation expires
+              example: "2024-01-15T10:15:00Z"
+
+    BookingDetailResponse:
+      type: object
+      description: Standardized response for booking details
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+        meta:
+          type: object
+          properties:
+            remainingTime:
+              type: integer
+              description: Seconds remaining until expiration (null if confirmed/cancelled/expired)
+              nullable: true
+              example: 450
+
+    BookingConfirmResponse:
+      type: object
+      description: Standardized response for booking confirmation
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+        meta:
+          type: object
+          required:
+            - payment
+          properties:
+            payment:
+              type: object
+              description: Payment information
+              required:
+                - transactionId
+                - status
+              properties:
+                transactionId:
+                  type: string
+                  description: Unique transaction identifier from payment provider
+                  example: "fake_txn_1234567890"
+                status:
+                  type: string
+                  enum: [completed, failed]
+                  description: Payment processing status
+                  example: "completed"
+                errorCode:
+                  type: string
+                  nullable: true
+                  description: Error code if payment failed
+                  example: null
+
+    BookingCancelResponse:
+      type: object
+      description: Standardized response for booking cancellation
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+        message:
+          type: string
+          description: Success message
+          example: "Booking cancelled successfully"

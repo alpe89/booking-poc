@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { TravelService } from './travel.service.js';
-import { PrismaService } from '../../shared/prisma/prisma.service.js';
+import { PrismaService } from '@shared/prisma/prisma.service.js';
 
 describe('TravelService', () => {
   let service: TravelService;

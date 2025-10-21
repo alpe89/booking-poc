@@ -42,7 +42,8 @@ model Booking {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  travel Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  travel   Travel    @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  payments Payment[]
 
   @@index([travelId, status])
   @@index([expiresAt])
@@ -50,9 +51,32 @@ model Booking {
   @@map("bookings")
 }
 
+model Payment {
+  id            String        @id @default(uuid())
+  bookingId     String
+  amount        Int
+  status        PaymentStatus
+  transactionId String?       // Null se fallito
+  errorCode     String?       // Es: CARD_DECLINED, INSUFFICIENT_FUNDS
+  cardLast4     String?       // Ultime 4 cifre della carta (per reference)
+  createdAt     DateTime      @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([transactionId])
+  @@map("payments")
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
   EXPIRED
   CANCELLED
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
 }
