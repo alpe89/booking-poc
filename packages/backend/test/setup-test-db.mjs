@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +17,18 @@ const TEST_DATABASE_URL = 'postgresql://booking_test:booking_test@localhost:5433
 async function setupTestDb() {
   console.log('🚀 Setting up test database...\n');
 
+  try {
+    console.log('📋 Step 1: Running database migrations...');
+    execSync('DATABASE_URL="' + TEST_DATABASE_URL + '" pnpm prisma migrate deploy', {
+      cwd: resolve(__dirname, '..'),
+      stdio: 'inherit',
+    });
+    console.log('✅ Migrations completed');
+  } catch (error) {
+    console.error('❌ Migration failed:', error.message);
+    process.exit(1);
+  }
+
   // Create Prisma client with test database URL
   const prisma = new PrismaClient({
     datasources: {
@@ -26,16 +39,16 @@ async function setupTestDb() {
   });
 
   try {
-    console.log('📋 Step 1: Testing connection to test database...');
+    console.log('\n📋 Step 2: Testing connection to test database...');
     await prisma.$connect();
     console.log('✅ Connected to test database');
 
-    console.log('\n📋 Step 2: Cleaning existing data...');
+    console.log('\n📋 Step 3: Cleaning existing data...');
     await prisma.booking.deleteMany();
     await prisma.travel.deleteMany();
     console.log('✅ Database cleaned');
 
-    console.log('\n📋 Step 3: Seeding test database with controlled test data...');
+    console.log('\n📋 Step 4: Seeding test database with controlled test data...');
 
     // Create test travels with known data
     const travel1 = await prisma.travel.create({

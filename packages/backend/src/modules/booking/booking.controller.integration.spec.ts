@@ -45,9 +45,12 @@ describe('BookingController (integration)', () => {
     // Clean bookings created during tests (keep seeded data)
     await prisma.booking.deleteMany({
       where: {
-        email: {
-          contains: 'integration-test',
-        },
+        OR: [
+          { email: { contains: 'integration-test' } },
+          { email: { contains: 'concurrent-user' } },
+          { email: { contains: 'race-user' } },
+          { email: { contains: 'expired-test' } },
+        ],
       },
     });
   });
@@ -513,6 +516,151 @@ describe('BookingController (integration)', () => {
         .expect(200);
 
       expect(getResponse.body.data.status).toBe('CANCELLED');
+    });
+  });
+
+  describe('Concurrency and race conditions', () => {
+    it('should prevent overbooking when multiple users book simultaneously', async () => {
+      // Get a travel with limited seats (Paris has 5 seats, all available)
+      const travelResponse = await request(app.getHttpServer())
+        .get('/api/travels/paris-romance')
+        .expect(200);
+
+      const parisId = travelResponse.body.data.id;
+      const availableSeats = travelResponse.body.meta.availableSeats;
+      expect(availableSeats).toBe(5);
+
+      // Simulate 10 concurrent users trying to book 1 seat each
+      // Only 5 should succeed, 5 should fail with 409 Conflict
+      const concurrentRequests = Array.from({ length: 10 }, (_, i) =>
+        request(app.getHttpServer())
+          .post('/api/bookings/reserve')
+          .send({
+            email: `concurrent-user-${i}@example.com`,
+            seats: 1,
+            travelId: parisId,
+          }),
+      );
+
+      // Execute all requests concurrently
+      const results = await Promise.allSettled(concurrentRequests);
+
+      // Count successful (201) and failed (409) requests
+      const successful = results.filter(
+        (r) => r.status === 'fulfilled' && r.value.status === 201,
+      );
+      const conflicts = results.filter(
+        (r) => r.status === 'fulfilled' && r.value.status === 409,
+      );
+
+      // Exactly 5 should succeed (available seats)
+      expect(successful.length).toBe(5);
+      // Exactly 5 should fail with conflict
+      expect(conflicts.length).toBe(5);
+
+      // Verify all successful bookings
+      successful.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          expect(result.value.body).toHaveProperty('data');
+          expect(result.value.body.data.status).toBe('PENDING');
+        }
+      });
+
+      // Verify all conflicts have proper error message
+      conflicts.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          expect(result.value.body).toHaveProperty('message');
+          expect(result.value.body.message.toLowerCase()).toContain('available');
+        }
+      });
+
+      // Verify the travel is now fully booked
+      const finalTravelResponse = await request(app.getHttpServer())
+        .get('/api/travels/paris-romance')
+        .expect(200);
+
+      expect(finalTravelResponse.body.meta.availableSeats).toBe(0);
+    });
+
+    it('should handle race condition with different seat counts', async () => {
+      // Use Ibiza (5 seats available, no bookings)
+      const travelResponse = await request(app.getHttpServer())
+        .get('/api/travels/ibiza-summer')
+        .expect(200);
+
+      const ibizaId = travelResponse.body.data.id;
+      expect(travelResponse.body.meta.availableSeats).toBe(5);
+
+      // Simulate 3 users trying to book: 2 seats, 2 seats, 2 seats (total 6, only 5 available)
+      const requests = [
+        request(app.getHttpServer()).post('/api/bookings/reserve').send({
+          email: 'race-user-1@example.com',
+          seats: 2,
+          travelId: ibizaId,
+        }),
+        request(app.getHttpServer()).post('/api/bookings/reserve').send({
+          email: 'race-user-2@example.com',
+          seats: 2,
+          travelId: ibizaId,
+        }),
+        request(app.getHttpServer()).post('/api/bookings/reserve').send({
+          email: 'race-user-3@example.com',
+          seats: 2,
+          travelId: ibizaId,
+        }),
+      ];
+
+      const results = await Promise.allSettled(requests);
+
+      const successful = results.filter(
+        (r) => r.status === 'fulfilled' && r.value.status === 201,
+      );
+      const conflicts = results.filter(
+        (r) => r.status === 'fulfilled' && r.value.status === 409,
+      );
+
+      // 2 should succeed (4 seats booked), 1 should fail (would need 2 but only 1 left)
+      expect(successful.length).toBe(2);
+      expect(conflicts.length).toBe(1);
+
+      // Verify only 1 seat remains
+      const finalResponse = await request(app.getHttpServer())
+        .get('/api/travels/ibiza-summer')
+        .expect(200);
+
+      expect(finalResponse.body.meta.availableSeats).toBe(1);
+    });
+
+    it('should properly lock and release when booking expires', async () => {
+      // This test verifies that expired PENDING bookings don't count towards available seats
+      // We already have this scenario in seed data (Tokyo with expired booking)
+      const tokyoResponse = await request(app.getHttpServer())
+        .get('/api/travels/tokyo-cherry-blossoms')
+        .expect(200);
+
+      const tokyoId = tokyoResponse.body.data.id;
+      // Tokyo should have 5 available seats despite having 1 expired PENDING booking
+      expect(tokyoResponse.body.meta.availableSeats).toBe(5);
+
+      // Should be able to book all 5 seats
+      const booking = await request(app.getHttpServer())
+        .post('/api/bookings/reserve')
+        .send({
+          email: 'concurrent-expired-test@example.com',
+          seats: 5,
+          travelId: tokyoId,
+        })
+        .expect(201);
+
+      expect(booking.body.data.status).toBe('PENDING');
+      expect(booking.body.data.seats).toBe(5);
+
+      // Now should be fully booked
+      const finalResponse = await request(app.getHttpServer())
+        .get('/api/travels/tokyo-cherry-blossoms')
+        .expect(200);
+
+      expect(finalResponse.body.meta.availableSeats).toBe(0);
     });
   });
 });
