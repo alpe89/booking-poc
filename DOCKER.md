@@ -12,6 +12,7 @@ The project includes two Docker Compose configurations:
 ## Services
 
 ### PostgreSQL Database
+
 - **Container**: `booking-postgres`
 - **Port**: 5432
 - **Image**: postgres:15-alpine
@@ -19,6 +20,7 @@ The project includes two Docker Compose configurations:
 - **Health check**: Automatic with retry
 
 ### Backend API (NestJS)
+
 - **Container**: `booking-backend` (production) / `booking-backend-dev` (development)
 - **Port**: 3000
 - **Context**: Root directory (to access shared package)
@@ -29,6 +31,7 @@ The project includes two Docker Compose configurations:
   - Stage 3 (production): Production-ready image
 
 ### Frontend (Nuxt 4)
+
 - **Container**: `booking-frontend` (production) / `booking-frontend-dev` (development)
 - **Port**: 3001
 - **Context**: Root directory (to access shared package)
@@ -39,12 +42,14 @@ The project includes two Docker Compose configurations:
   - Stage 3 (production): Production-ready image
 
 ### Swagger UI
+
 - **Container**: `booking-swagger-ui`
 - **Port**: 8080
 - **Image**: swaggerapi/swagger-ui:latest
 - **Volume**: Mounts `openapi.yaml` for API documentation
 
 ### Prisma Studio
+
 - **Container**: `booking-prisma-studio`
 - **Port**: 5555
 - **Build**: Uses builder stage from backend Dockerfile
@@ -111,6 +116,7 @@ docker-compose -f docker-compose.dev.yml up postgres backend
 **Location**: `packages/backend/Dockerfile`
 
 **Key features**:
+
 - Multi-stage build (deps → builder → production)
 - Includes `@booking/shared` package
 - Generates Prisma client during build
@@ -118,6 +124,7 @@ docker-compose -f docker-compose.dev.yml up postgres backend
 - Runs database migrations on startup (TODO)
 
 **Stages**:
+
 1. **deps**: Install all workspace dependencies
 2. **builder**: Build application and generate Prisma client
 3. **production**: Minimal production image with built artifacts
@@ -127,6 +134,7 @@ docker-compose -f docker-compose.dev.yml up postgres backend
 **Location**: `packages/frontend/Dockerfile`
 
 **Key features**:
+
 - Multi-stage build (deps → builder → production)
 - Includes `@booking/shared` package
 - Builds Nuxt application with SSR
@@ -134,6 +142,7 @@ docker-compose -f docker-compose.dev.yml up postgres backend
 - Exposes port 3000 internally
 
 **Stages**:
+
 1. **deps**: Install all workspace dependencies
 2. **builder**: Build Nuxt application
 3. **production**: Minimal production image with `.output` directory
@@ -162,21 +171,26 @@ NUXT_PUBLIC_API_BASE=http://backend:3000/api
 ## .dockerignore Files
 
 ### Root `.dockerignore`
+
 Excludes common files like `node_modules`, `.git`, logs, etc.
 
 ### Backend `.dockerignore`
+
 Excludes build outputs, test files, and development artifacts.
 
 ### Frontend `.dockerignore`
+
 Excludes `.nuxt`, `.output`, and other build artifacts.
 
 ## Volume Mounts
 
-### Production Mode
+### Production Mode volumes
+
 - **PostgreSQL**: `postgres-data:/var/lib/postgresql/data` (persistent)
 - **Swagger UI**: `./openapi.yaml:/openapi/openapi.yaml:ro` (read-only)
 
-### Development Mode
+### Development Mode volumes
+
 - **Backend**:
   - `./packages/backend/src:/app/packages/backend/src`
   - `./packages/backend/prisma:/app/packages/backend/prisma`
@@ -195,6 +209,7 @@ All services use the default bridge network created by Docker Compose. Services 
 ### Backend cannot connect to database
 
 Check that PostgreSQL is healthy:
+
 ```bash
 docker-compose ps
 docker-compose logs postgres
@@ -203,6 +218,7 @@ docker-compose logs postgres
 ### Frontend cannot reach backend
 
 Verify environment variables:
+
 ```bash
 # Inside frontend container
 docker-compose exec frontend env | grep NUXT_PUBLIC_API_BASE
@@ -211,6 +227,7 @@ docker-compose exec frontend env | grep NUXT_PUBLIC_API_BASE
 ### Build fails with "Cannot find module"
 
 Rebuild with no cache:
+
 ```bash
 docker-compose build --no-cache
 ```
@@ -218,6 +235,7 @@ docker-compose build --no-cache
 ### Port already in use
 
 Check if ports are occupied:
+
 ```bash
 lsof -i :3000
 lsof -i :3001
@@ -229,6 +247,7 @@ Stop conflicting services or change ports in `docker-compose.yml`.
 ### Shared package changes not reflected
 
 Rebuild the affected service:
+
 ```bash
 docker-compose up --build backend
 docker-compose up --build frontend
@@ -247,16 +266,19 @@ docker-compose up --build frontend
 ## Performance
 
 ### Build Time Optimization
+
 - Dependencies cached in separate stage
 - Only relevant files copied (via .dockerignore)
 - Workspace-aware dependency installation
 
 ### Runtime Optimization
+
 - Production stage uses `--prod` flag
 - No dev dependencies in final image
 - Minimal layers for faster image pulls
 
 ### Development Experience
+
 - Hot-reload enabled in dev mode
 - Source code mounted for instant changes
 - No need to rebuild for code changes

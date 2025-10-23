@@ -144,7 +144,7 @@ GraphQL could be added later. The project starts with REST because:
 services:
   postgres:      # PostgreSQL Database (port 5432)
   backend:       # NestJS API (port 3000)
-  frontend:      # Nuxt 3 App (port 3001)
+  frontend:      # Nuxt 4 App (port 3001)
   swagger-ui:    # API Documentation (port 8080)
   prisma-studio: # Database Management UI (port 5555)
 ```
