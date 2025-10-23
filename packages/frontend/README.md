@@ -1,75 +1,72 @@
-# Nuxt Minimal Starter
+# Travel Booking Frontend
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Frontend application built with Nuxt 4 and NuxtUI for the travel booking system.
 
-## Setup
+## Tech Stack
 
-Make sure to install dependencies:
+- **Nuxt 4** - Vue.js framework
+- **NuxtUI** - UI component library
+- **TypeScript** - Type safety
+- **Shared Package** - Shared types and schemas with backend via `@booking/shared`
+
+## Features
+
+- Browse available travels with pagination
+- View travel details with mood indicators
+- Reserve bookings with seat selection
+- Confirm payments (fake payment in POC)
+- Cancel bookings
+- Auto-refresh booking status
+- Dark mode support (via NuxtUI)
+
+## Pages
+
+- `/` - Travel listing page
+- `/travels/[slug]` - Travel detail and booking page
+- `/bookings/[id]` - Booking detail, confirmation, and cancellation page
+
+## Development
 
 ```bash
-# npm
-npm install
-
-# pnpm
+# Install dependencies
 pnpm install
 
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
+# Run development server (on http://localhost:3001)
 pnpm dev
 
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
+# Build for production
 pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+## Environment Variables
 
-```bash
-# npm
-npm run preview
+- `NUXT_PUBLIC_API_BASE` - Backend API base URL (default: `http://localhost:3000/api`)
 
-# pnpm
-pnpm preview
+## API Integration
 
-# yarn
-yarn preview
+The frontend uses a composable `useApi()` that provides type-safe API calls:
 
-# bun
-bun run preview
+```typescript
+const api = useApi()
+
+// List travels
+const travels = await api.travels.list({ page: 1, limit: 10 })
+
+// Get travel by slug
+const travel = await api.travels.getBySlug('iceland-adventure')
+
+// Reserve booking
+const booking = await api.bookings.reserve({
+  email: 'user@example.com',
+  seats: 2,
+  travelId: 'uuid',
+})
+
+// Confirm booking
+await api.bookings.confirm(bookingId, { paymentMethod: 'fake' })
+
+// Cancel booking
+await api.bookings.cancel(bookingId)
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+All types are shared with the backend via the `@booking/shared` package, ensuring type safety across the stack.

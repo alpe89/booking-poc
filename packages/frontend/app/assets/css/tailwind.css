@@ -1,0 +1,61 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  /* WeRoad Brand Colors */
+  --color-weroad-50: #FFF5F3;
+  --color-weroad-100: #FFE5E2;
+  --color-weroad-200: #FFC7C0;
+  --color-weroad-300: #FFA49A;
+  --color-weroad-400: #FF7B6F;
+  --color-weroad-500: #FF4338;
+  --color-weroad-600: #E2342A;
+  --color-weroad-700: #BD271F;
+  --color-weroad-800: #9A1E17;
+  --color-weroad-900: #7C1813;
+  --color-weroad-950: #430907;
+
+  /* Sand Colors */
+  --color-sand-50: #FDF9F5;
+  --color-sand-100: #F8F1EA;
+  --color-sand-200: #F0E4D9;
+  --color-sand-300: #E2CFBB;
+  --color-sand-400: #C4A889;
+  --color-sand-500: #A9805D;
+  --color-sand-600: #8C6442;
+  --color-sand-700: #6F4D32;
+  --color-sand-800: #543924;
+  --color-sand-900: #3C2818;
+  --color-sand-950: #24160C;
+
+  /* Ocean Colors */
+  --color-ocean-50: #F3F6FC;
+  --color-ocean-100: #E2E8F8;
+  --color-ocean-200: #C5D0F1;
+  --color-ocean-300: #9AB0E6;
+  --color-ocean-400: #708ED8;
+  --color-ocean-500: #3F66C3;
+  --color-ocean-600: #2E4FA8;
+  --color-ocean-700: #253E84;
+  --color-ocean-800: #1F3368;
+  --color-ocean-900: #192950;
+  --color-ocean-950: #101834;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  min-height: 100%;
+  font-family: 'Poppins', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background-color: #fdf9f5;
+  color: #3C2818;
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: #ff4338;
+  color: #fff;
+}

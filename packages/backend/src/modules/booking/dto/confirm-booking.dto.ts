@@ -1,11 +1,4 @@
-import { z } from 'zod';
+import { ConfirmBookingSchema, type ConfirmBookingDto } from '@booking/shared';
 
-/**
- * Schema for confirming a booking with fake payment
- * As per OpenAPI spec, only accepts paymentMethod: 'fake'
- */
-export const ConfirmBookingSchema = z.object({
-  paymentMethod: z.literal('fake').describe('Payment method (only "fake" supported in POC)'),
-});
-
-export type ConfirmBookingDto = z.infer<typeof ConfirmBookingSchema>;
+// Re-export from shared package
+export { ConfirmBookingSchema, type ConfirmBookingDto };

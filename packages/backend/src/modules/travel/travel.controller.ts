@@ -1,17 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { z } from 'zod';
 import { TravelService } from './travel.service.js';
 import type { GetTravelsQuery } from './dto/travel.dto.js';
-import { GetTravelsQuerySchema } from './dto/travel.dto.js';
+import { GetTravelsQuerySchema, SlugSchema } from './dto/travel.dto.js';
 import { ZodQuery } from '@shared/decorators/zod-query.decorator.js';
 import { ZodParam } from '@shared/decorators/zod-param.decorator.js';
 import { ApiResponse } from '@shared/decorators/api-response.decorator.js';
-
-const SlugSchema = z
-  .string()
-  .min(1)
-  .max(255)
-  .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens');
 
 @Controller('api/travels')
 export class TravelController {

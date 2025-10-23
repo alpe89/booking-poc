@@ -31,10 +31,15 @@ Implement a checkout process for users to buy a Travel where:
 
 ### Frontend
 
-- **Nuxt 3** - Vue.js framework with SSR
+- **Nuxt 4** - Vue.js framework with SSR
 - **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first CSS framework
+- **Tailwind CSS** - Utility-first CSS framework (via Nuxt UI)
 - **Nuxt UI** - Component library for rapid development with built-in accessibility
+
+### Shared
+
+- **@booking/shared** - Shared types and Zod schemas between frontend and backend
+- **Zod** - Schema validation library for type-safe API contracts
 
 ### Infrastructure
 
@@ -74,15 +79,18 @@ booking-poc/
     │   │   └── main.ts
     │   └── test/
     │
-    └── frontend/               # Nuxt 3 App
-        ├── Dockerfile
+    ├── frontend/               # Nuxt 4 App
+    │   ├── Dockerfile
+    │   ├── package.json
+    │   ├── pages/
+    │   ├── composables/
+    │   └── nuxt.config.ts
+    │
+    └── shared/                 # Shared types & schemas
         ├── package.json
-        ├── pages/
-        ├── features/
-        │   ├── travel/
-        │   ├── booking/
-        │   └── payment/
-        └── shared/
+        ├── src/
+        │   ├── schemas/        # Zod schemas (DTOs)
+        │   └── types/          # TypeScript types
 ```
 
 ### Why pnpm Workspaces?
@@ -184,6 +192,8 @@ You can test all endpoints directly from the browser.
 
 ### Quick Start with Docker
 
+**Production mode** (optimized builds):
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -194,6 +204,16 @@ docker-compose up
 
 # Or with rebuild
 docker-compose up --build
+```
+
+**Development mode** (with hot-reload):
+
+```bash
+# Start all services with hot-reload
+docker-compose -f docker-compose.dev.yml up
+
+# Or with rebuild
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
 Available services:
@@ -358,9 +378,11 @@ As required by the specification, the project focuses on:
   - [x] `packages/backend` and `packages/frontend` directories
 - [x] Setup Docker Compose
   - [x] `docker-compose.yml` with postgres, backend, frontend, swagger ui, prisma studio
-  - [x] Dockerfile for backend (multi-stage build)
-  - [ ] Dockerfile for frontend
+  - [x] `docker-compose.dev.yml` for development with hot-reload
+  - [x] Dockerfile for backend (multi-stage build with shared package)
+  - [x] Dockerfile for frontend (multi-stage build with shared package)
   - [x] Volume for PostgreSQL persistence
+  - [x] `.dockerignore` files for optimized builds
 - [x] Environment configuration
   - [x] `.env.example` files
   - [x] `.dockerignore` and `.gitignore`

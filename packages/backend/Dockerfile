@@ -1,63 +1,54 @@
-# Stage 1: Dependencies
-FROM node:22-alpine AS deps
+# Base image reused across stages
+FROM node:22-alpine AS base
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.18.3 --activate
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-# Copy workspace and backend package files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+# Install dependencies (dev + prod)
+FROM base AS deps
+
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/backend/package.json ./packages/backend/
+COPY packages/shared/package.json ./packages/shared/
 
-# Install all dependencies (workspace root + backend)
-RUN pnpm install --frozen-lockfile --filter backend...
+RUN pnpm install --frozen-lockfile
 
-# Stage 2: Builder
-FROM node:22-alpine AS builder
-WORKDIR /app
+# Builder stage (also exposed for prisma-studio target)
+FROM base AS builder
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.18.3 --activate
+COPY --from=deps /app/ ./
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/backend/node_modules ./packages/backend/node_modules
-
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY packages/shared ./packages/shared
 COPY packages/backend ./packages/backend
 
-# Generate Prisma Client
+WORKDIR /app
+RUN pnpm --filter @booking/shared... run build
+
 WORKDIR /app/packages/backend
+
 RUN pnpm prisma generate
+RUN pnpm --filter backend run build
 
-# Build application
-RUN pnpm build
-
-# Stage 3: Production
+# Production image
 FROM node:22-alpine AS production
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.18.3 --activate
+RUN corepack enable && corepack prepare pnpm@10.19.0 --activate
 
-# Copy workspace and backend package files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/backend/package.json ./packages/backend/
+COPY packages/shared/package.json ./packages/shared/
 
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod --filter backend...
+RUN pnpm install --frozen-lockfile --prod --filter backend... --filter @booking/shared...
 
-# Change to backend directory
+COPY --from=builder /app/packages/shared ./packages/shared
+
 WORKDIR /app/packages/backend
 
-# Copy built application from builder
 COPY --from=builder /app/packages/backend/dist ./dist
 COPY --from=builder /app/packages/backend/generated ./generated
 COPY --from=builder /app/packages/backend/prisma ./prisma
 
-# Expose port
 EXPOSE 3000
 
-# Start application
 CMD ["node", "dist/main.js"]

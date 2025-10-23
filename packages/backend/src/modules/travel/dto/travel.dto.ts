@@ -1,12 +1,8 @@
 import { z } from 'zod';
+import { GetTravelsQuerySchema, type GetTravelsQuery, SlugSchema, type Slug } from '@booking/shared';
 
-// Query parameters for GET /api/travels
-export const GetTravelsQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
-});
-
-export type GetTravelsQuery = z.infer<typeof GetTravelsQuerySchema>;
+// Re-export from shared package
+export { GetTravelsQuerySchema, type GetTravelsQuery, SlugSchema, type Slug };
 
 // Response schema for GET /api/travels
 export const TravelSchema = z.object({

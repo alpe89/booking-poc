@@ -1,0 +1,99 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: booking-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-booking}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend API (Development with hot-reload)
+  backend:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+      target: builder
+    container_name: booking-backend-dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '${PORT:-3000}:3000'
+    volumes:
+      - ./packages/backend/src:/app/packages/backend/src
+      - ./packages/backend/prisma:/app/packages/backend/prisma
+      - ./packages/shared:/app/packages/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /app/packages/backend
+    command: pnpm dev
+
+  # Nuxt 4 Frontend (Development with hot-reload)
+  frontend:
+    build:
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
+      target: builder
+    container_name: booking-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NUXT_PUBLIC_API_BASE=http://localhost:3000/api
+    ports:
+      - '3001:3000'
+    volumes:
+      - ./packages/frontend:/app/packages/frontend
+      - ./packages/shared:/app/packages/shared
+      - /app/packages/frontend/node_modules
+      - /app/packages/frontend/.nuxt
+    depends_on:
+      - backend
+    working_dir: /app/packages/frontend
+    command: pnpm dev
+
+  # Swagger UI for API Documentation
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: booking-swagger-ui
+    restart: unless-stopped
+    environment:
+      SWAGGER_JSON: /openapi/openapi.yaml
+      BASE_URL: /
+      DISPLAY_REQUEST_DURATION: 'true'
+      DEEP_LINKING: 'true'
+      TRY_IT_OUT_ENABLED: 'true'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./openapi.yaml:/openapi/openapi.yaml:ro
+
+  # Prisma Studio for Database Management
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+      target: builder
+    container_name: booking-prisma-studio
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '5555:5555'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /app/packages/backend
+    command: pnpm prisma studio --port 5555 --browser none
+
+volumes:
+  postgres-data:
+    driver: local

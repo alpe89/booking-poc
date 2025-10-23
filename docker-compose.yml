@@ -31,24 +31,20 @@ services:
       postgres:
         condition: service_healthy
 
-  # Nuxt 3 Frontend
+  # Nuxt 4 Frontend
   frontend:
     build:
-      context: ./packages/frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
     container_name: booking-frontend
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      - NUXT_PUBLIC_API_BASE=http://localhost:3000/api
+      - NUXT_API_BASE_INTERNAL=http://backend:3000/api
     ports:
       - '3001:3000'
-    volumes:
-      - ./packages/frontend:/app
-      - /app/node_modules
-      - /app/.nuxt
     depends_on:
       - backend
-    command: npm run dev
 
   # Swagger UI for API Documentation
   swagger-ui:

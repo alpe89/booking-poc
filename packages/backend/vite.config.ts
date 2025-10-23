@@ -1,9 +1,10 @@
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vite';
+import type { PluginOption } from 'vite';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [swc.vite()],
+  plugins: [swc.vite() as PluginOption],
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, './src/shared'),

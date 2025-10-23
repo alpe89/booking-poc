@@ -365,7 +365,10 @@ describe('BookingService', () => {
       const result = await service.cancel(pendingBooking.id);
 
       expect(result).toEqual({
-        success: true,
+        data: {
+          ...pendingBooking,
+          status: BookingStatus.CANCELLED,
+        },
         message: 'Booking cancelled successfully',
       });
       expect(prisma.booking.update).toHaveBeenCalledWith({
