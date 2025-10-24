@@ -1,6 +1,28 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useCountdown } from './useCountdown'
-import { nextTick } from 'vue'
+import { nextTick, createApp } from 'vue'
+
+const mountCountdown = (options: Parameters<typeof useCountdown>[0]) => {
+  let composable!: ReturnType<typeof useCountdown>
+
+  const app = createApp({
+    setup() {
+      composable = useCountdown(options)
+      return () => null
+    },
+  })
+
+  const root = document.createElement('div')
+  document.body.appendChild(root)
+  app.mount(root)
+
+  const cleanup = () => {
+    app.unmount()
+    root.remove()
+  }
+
+  return { cleanup, ...composable } as ReturnType<typeof useCountdown> & { cleanup: () => void }
+}
 
 describe('useCountdown', () => {
   beforeEach(() => {
@@ -12,91 +34,100 @@ describe('useCountdown', () => {
   })
 
   it('should initialize with initial time', () => {
-    const { remainingTime } = useCountdown({ initialTime: 100 })
-    expect(remainingTime.value).toBe(100)
+    const countdown = mountCountdown({ initialTime: 100 })
+    expect(countdown.remainingTime.value).toBe(100)
+    countdown.cleanup()
   })
 
   it('should initialize with null if no initial time', () => {
-    const { remainingTime } = useCountdown({ initialTime: null })
-    expect(remainingTime.value).toBeNull()
+    const countdown = mountCountdown({ initialTime: null })
+    expect(countdown.remainingTime.value).toBeNull()
+    countdown.cleanup()
   })
 
   it('should format time correctly', () => {
-    const { formattedTime } = useCountdown({ initialTime: 125 })
-    expect(formattedTime.value).toBe('2m 5s')
+    const countdown = mountCountdown({ initialTime: 125 })
+    expect(countdown.formattedTime.value).toBe('2m 5s')
+    countdown.cleanup()
   })
 
   it('should format zero time', () => {
-    const { formattedTime } = useCountdown({ initialTime: 0 })
-    expect(formattedTime.value).toBe('0m 0s')
+    const countdown = mountCountdown({ initialTime: 0 })
+    expect(countdown.formattedTime.value).toBe('0m 0s')
+    countdown.cleanup()
   })
 
   it('should start countdown and decrement every second', async () => {
-    const { remainingTime, start } = useCountdown({ initialTime: 10 })
+    const countdown = mountCountdown({ initialTime: null })
 
-    start()
+    countdown.reset(10)
     await nextTick()
 
-    expect(remainingTime.value).toBe(10)
+    expect(countdown.remainingTime.value).toBe(10)
 
     vi.advanceTimersByTime(1000)
     await nextTick()
-    expect(remainingTime.value).toBe(9)
+    expect(countdown.remainingTime.value).toBe(9)
 
     vi.advanceTimersByTime(1000)
     await nextTick()
-    expect(remainingTime.value).toBe(8)
+    expect(countdown.remainingTime.value).toBe(8)
+
+    countdown.cleanup()
   })
 
   it('should call onExpire when countdown reaches zero', async () => {
     const onExpire = vi.fn()
-    const { start } = useCountdown({ initialTime: 2, onExpire })
+    const countdown = mountCountdown({ initialTime: null, onExpire })
 
-    start()
+    countdown.reset(2)
     await nextTick()
 
     vi.advanceTimersByTime(2000)
     await nextTick()
 
     expect(onExpire).toHaveBeenCalledTimes(1)
+    countdown.cleanup()
   })
 
   it('should stop countdown when stop is called', async () => {
-    const { remainingTime, start, stop } = useCountdown({ initialTime: 10 })
+    const countdown = mountCountdown({ initialTime: null })
 
-    start()
+    countdown.reset(10)
     await nextTick()
 
     vi.advanceTimersByTime(2000)
     await nextTick()
-    expect(remainingTime.value).toBe(8)
+    expect(countdown.remainingTime.value).toBe(8)
 
-    stop()
+    countdown.stop()
     vi.advanceTimersByTime(5000)
     await nextTick()
 
     // Should not change after stop
-    expect(remainingTime.value).toBe(8)
+    expect(countdown.remainingTime.value).toBe(8)
+    countdown.cleanup()
   })
 
   it('should reset countdown to new time', async () => {
-    const { remainingTime, reset } = useCountdown({ initialTime: 10 })
+    const countdown = mountCountdown({ initialTime: null })
 
-    reset(50)
+    countdown.reset(50)
     await nextTick()
 
-    expect(remainingTime.value).toBe(50)
+    expect(countdown.remainingTime.value).toBe(50)
+    countdown.cleanup()
   })
 
   it('should call onSync periodically when provided', async () => {
     const onSync = vi.fn().mockResolvedValue(100)
-    const { start } = useCountdown({
-      initialTime: 10,
+    const countdown = mountCountdown({
+      initialTime: null,
       onSync,
       syncInterval: 5000,
     })
 
-    start()
+    countdown.reset(10)
     await nextTick()
 
     vi.advanceTimersByTime(5000)
@@ -108,48 +139,53 @@ describe('useCountdown', () => {
     await nextTick()
 
     expect(onSync).toHaveBeenCalledTimes(2)
+    countdown.cleanup()
   })
 
   it('should not start if initial time is null', async () => {
-    const { remainingTime, start } = useCountdown({ initialTime: null })
+    const countdown = mountCountdown({ initialTime: null })
 
-    start()
+    countdown.start()
     await nextTick()
 
     vi.advanceTimersByTime(5000)
     await nextTick()
 
-    expect(remainingTime.value).toBeNull()
+    expect(countdown.remainingTime.value).toBeNull()
+    countdown.cleanup()
   })
 
   it('should not start if initial time is zero', async () => {
     const onExpire = vi.fn()
-    const { remainingTime, start } = useCountdown({ initialTime: 0, onExpire })
+    const countdown = mountCountdown({ initialTime: null, onExpire })
 
-    start()
+    countdown.reset(0)
+    countdown.start()
     await nextTick()
 
     vi.advanceTimersByTime(1000)
     await nextTick()
 
-    expect(remainingTime.value).toBe(0)
+    expect(countdown.remainingTime.value).toBe(0)
     expect(onExpire).not.toHaveBeenCalled()
+    countdown.cleanup()
   })
 
   it('should update remaining time from onSync result', async () => {
     const onSync = vi.fn().mockResolvedValue(50)
-    const { remainingTime, start } = useCountdown({
-      initialTime: 10,
+    const countdown = mountCountdown({
+      initialTime: null,
       onSync,
       syncInterval: 2000,
     })
 
-    start()
+    countdown.reset(10)
     await nextTick()
 
     vi.advanceTimersByTime(2000)
     await nextTick()
     // Wait for async onSync to complete
-    await vi.waitFor(() => expect(remainingTime.value).toBe(50))
+    await vi.waitFor(() => expect(countdown.remainingTime.value).toBe(50))
+    countdown.cleanup()
   })
 })

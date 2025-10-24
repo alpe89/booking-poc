@@ -20,7 +20,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "types": ["vitest/globals"],
+    "types": ["vitest/globals", "./types/prisma-alias"],
     "paths": {
       "@shared/*": ["src/shared/*"],
       "@modules/*": ["src/modules/*"],

@@ -81,7 +81,7 @@ config.global.stubs = {
   UContainer: {
     template: '<div><slot /></div>',
   },
-  UDivider: {
+  USeparator: {
     template: '<hr />',
   },
   UAlert: {
@@ -111,7 +111,7 @@ config.global.stubs = {
       },
     },
   },
-  UFormGroup: {
+  UFormField: {
     template: '<div><slot /></div>',
   },
 }
