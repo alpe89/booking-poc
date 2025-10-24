@@ -23,8 +23,8 @@ export const TRAVELS_DATA = [
   },
   {
     id: '4f4bd032-e7d4-402a-bdf6-aaf6be240d53',
-    slug: 'iceland-hunting-northern-lights',
-    name: 'Iceland: hunting for the Northern Lights',
+    slug: 'iceland-northern-lights',
+    name: 'Iceland: Northern Lights',
     description:
       "Why visit Iceland in winter? Because it is between October and March that this land offers the spectacle of the Northern Lights, one of the most incredible and magical natural phenomena in the world, visible only near the earth's two magnetic poles. Come with us on WeRoad to explore this land of ice and fire, full of contrasts and natural variety, where the energy of waterfalls and geysers meets the peace of the fjords... And when the ribbons of light of the aurora borealis twinkle in the sky before our enchanted eyes, we will know that we have found what we were looking for.",
     startingDate: '2021-11-01',
@@ -53,6 +53,40 @@ export const TRAVELS_DATA = [
       history: 20,
       culture: 80,
       party: 70,
+    },
+  },
+  {
+    id: 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
+    slug: 'paris-romance',
+    name: 'Paris: City of Romance',
+    description:
+      'Experience the magic of Paris, the city of lights and love. From the iconic Eiffel Tower to charming cafes and world-class museums.',
+    startingDate: '2021-12-01',
+    endingDate: '2021-12-07',
+    price: 179900,
+    moods: {
+      nature: 10,
+      relax: 50,
+      history: 80,
+      culture: 90,
+      party: 40,
+    },
+  },
+  {
+    id: 'b2c3d4e5-f6a7-5b6c-9d8e-0f1a2b3c4d5e',
+    slug: 'tokyo-cherry-blossoms',
+    name: 'Tokyo: Cherry Blossom Season',
+    description:
+      'Discover Tokyo during the magical cherry blossom season. Experience traditional temples, modern technology, and unforgettable cuisine.',
+    startingDate: '2022-03-15',
+    endingDate: '2022-03-22',
+    price: 249900,
+    moods: {
+      nature: 70,
+      relax: 30,
+      history: 60,
+      culture: 100,
+      party: 50,
     },
   },
 ]
