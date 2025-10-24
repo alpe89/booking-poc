@@ -1,9 +1,9 @@
 import { createParamDecorator, ExecutionContext, BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
-import { ZodType, ZodError } from 'zod';
+import { type ZodType, ZodError } from 'zod';
 
-export const ZodParam = (schema: ZodType, paramName: string) =>
-  createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
+export const ZodParam = <T>(schema: ZodType<T>, paramName: string) =>
+  createParamDecorator((_data: unknown, ctx: ExecutionContext): T => {
     const request = ctx.switchToHttp().getRequest<Request>();
     const paramValue = request.params[paramName];
 
