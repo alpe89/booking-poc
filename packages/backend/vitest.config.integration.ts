@@ -16,8 +16,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: ['./test/setup-integration.ts'],
-
     // Only run integration tests
     include: ['**/*.integration.spec.ts'],
     exclude: ['node_modules/**', 'dist/**'],

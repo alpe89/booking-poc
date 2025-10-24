@@ -80,24 +80,12 @@ jobs:
       - name: Run unit tests (frontend)
         run: pnpm --filter frontend test
 
-      - name: Setup database
+      - name: Setup test database
         env:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
-          PGPASSWORD: booking_secret
         run: |
-          echo "Running migrations..."
-          pnpm --filter backend exec prisma migrate deploy
-          echo "Running seed..."
-          echo "DATABASE_URL: $DATABASE_URL"
           cd packages/backend
-          echo "Current directory: $(pwd)"
-          echo "Checking prisma.config.ts..."
-          cat prisma/prisma.config.ts
-          echo "Running seed command..."
-          DATABASE_URL=$DATABASE_URL node prisma/seed.mjs
-          cd ../..
-          echo "Verifying seed data..."
-          psql -h localhost -U booking -d booking_db -c "SELECT COUNT(*) FROM travels;"
+          DATABASE_URL=$DATABASE_URL node test/setup-test-db.mjs
 
       - name: Run integration tests (backend)
         env:

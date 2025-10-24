@@ -9,7 +9,8 @@ const __dirname = dirname(__filename);
 // Import Prisma client from custom output path
 const { PrismaClient } = await import(resolve(__dirname, '../generated/prisma/index.js'));
 
-const TEST_DATABASE_URL = 'postgresql://booking_test:booking_test@localhost:5433/booking_test?schema=public';
+// Use DATABASE_URL from environment, or fallback to local test DB
+const TEST_DATABASE_URL = process.env.DATABASE_URL || 'postgresql://booking_test:booking_test@localhost:5433/booking_test?schema=public';
 
 /**
  * Setup test database
