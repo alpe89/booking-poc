@@ -68,20 +68,18 @@ jobs:
         run: pnpm --filter frontend test
 
       - name: Setup database
-        working-directory: packages/backend
         env:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
         run: |
-          pnpm prisma migrate deploy
-          pnpm prisma db seed
+          pnpm --filter backend exec prisma migrate deploy
+          pnpm --filter backend exec prisma db seed
 
       - name: Run integration tests (backend)
-        working-directory: packages/backend
         env:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
           NODE_ENV: test
           PORT: 3000
-        run: pnpm test:integration
+        run: pnpm --filter backend test:integration
 
       - name: Build backend
         run: pnpm --filter backend build
