@@ -20,6 +20,7 @@
     "test:ui": "dotenv -e .env.local --override -- vitest --ui",
     "test:cov": "dotenv -e .env.local --override -- vitest run --coverage",
     "test:integration": "dotenv -e .env.test --override -- vitest run --config vitest.config.integration.ts",
+    "test:integration:ci": "vitest run --config vitest.config.integration.ts",
     "test:integration:watch": "dotenv -e .env.test --override -- vitest --config vitest.config.integration.ts",
     "test:db:setup": "node test/setup-test-db.mjs",
     "test:db:up": "docker compose -f ../../docker-compose.test.yml up -d postgres-test",

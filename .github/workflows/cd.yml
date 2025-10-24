@@ -6,11 +6,24 @@ on:
       - 'v*.*.*'
   release:
     types: [published]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main]
 
 jobs:
   test-and-deploy:
     name: Full Test Suite and Deploy
     runs-on: ubuntu-latest
+    # Only run if:
+    # - Triggered by tag push, OR
+    # - Triggered by release, OR
+    # - Triggered by CI completion AND CI succeeded
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
 
     services:
       postgres:
@@ -79,7 +92,7 @@ jobs:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
           NODE_ENV: test
           PORT: 3000
-        run: pnpm --filter backend test:integration
+        run: pnpm --filter backend test:integration:ci
 
       - name: Build backend
         run: pnpm --filter backend build
