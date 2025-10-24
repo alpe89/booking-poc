@@ -48,7 +48,7 @@ describe('TravelCard', () => {
       props: { travel: mockTravel },
     })
 
-    expect(wrapper.text()).toContain('€999.00')
+    expect(wrapper.text()).toContain('999,00')
   })
 
   it('should render total seats', () => {

@@ -1,10 +1,9 @@
-import swc from 'unplugin-swc';
 import { defineConfig } from 'vite';
-import type { PluginOption } from 'vite';
+import swc from 'unplugin-swc';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [swc.vite() as PluginOption],
+  plugins: [swc.vite()],
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, './src/shared'),
@@ -16,19 +15,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // Only run integration tests
-    include: ['**/*.integration.spec.ts'],
-    exclude: ['node_modules/**', 'dist/**'],
-    // Run tests sequentially to avoid database conflicts
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
-    // Longer timeout for integration tests
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    include: ['src/**/*.spec.ts'],
+    exclude: ['**/*.integration.spec.ts', 'node_modules/**', 'dist/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

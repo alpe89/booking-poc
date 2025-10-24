@@ -5,18 +5,16 @@ describe('useFormatters', () => {
   const { formatDate, formatDateShort, formatPrice, formatTime, formatDuration } = useFormatters()
 
   describe('formatDate', () => {
-    it('should format date with default locale and options', () => {
+    it('should format date with default locale (it-IT)', () => {
       const date = '2025-03-15T10:30:00Z'
       const result = formatDate(date)
-      expect(result).toMatch(/March|Mar/)
-      expect(result).toContain('15')
-      expect(result).toContain('2025')
+      expect(result).toBe('15 marzo 2025')
     })
 
     it('should format date with custom locale', () => {
       const date = '2025-03-15T10:30:00Z'
-      const result = formatDate(date, 'it-IT')
-      expect(result).toMatch(/marzo|mar/)
+      const result = formatDate(date, 'en-US')
+      expect(result).toMatch(/March|Mar/)
     })
 
     it('should handle invalid dates gracefully', () => {
@@ -29,7 +27,7 @@ describe('useFormatters', () => {
     it('should format date in short format', () => {
       const date = '2025-03-15T10:30:00Z'
       const result = formatDateShort(date)
-      expect(result).toBe('Mar 15, 2025')
+      expect(result).toBe('15 mar 2025')
     })
   })
 
@@ -37,24 +35,24 @@ describe('useFormatters', () => {
     it('should format price in cents to EUR with symbol', () => {
       const cents = 12500 // 125.00 EUR
       const result = formatPrice(cents)
-      expect(result).toBe('€125.00')
+      expect(result).toBe('125,00 €')
     })
 
     it('should format price with different currency', () => {
       const cents = 9999
       const result = formatPrice(cents, 'USD')
-      expect(result).toContain('99.99')
+      expect(result).toBe('99,99 USD')
     })
 
     it('should handle zero price', () => {
       const result = formatPrice(0)
-      expect(result).toBe('€0.00')
+      expect(result).toBe('0,00 €')
     })
 
     it('should handle negative prices', () => {
       const result = formatPrice(-5000)
       expect(result).toContain('-')
-      expect(result).toContain('50.00')
+      expect(result).toContain('50,00')
     })
   })
 

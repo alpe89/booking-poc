@@ -20,7 +20,7 @@ describe('BookingForm', () => {
     const wrapper = mount(BookingForm, { props: defaultProps })
 
     // 1 seat * 500 EUR = 500.00
-    expect(wrapper.text()).toContain('500.00')
+    expect(wrapper.text()).toContain('500,00')
   })
 
   it('should show "Sold out" when no seats available', () => {
