@@ -89,4 +89,21 @@ export const TRAVELS_DATA = [
       party: 50,
     },
   },
+  {
+    id: 'c3d4e5f6-a7b8-6c7d-0e9f-1a2b3c4d5e6f',
+    slug: 'ibiza-summer',
+    name: 'Ibiza: Summer Party',
+    description:
+      'Experience the ultimate summer party destination. World-famous clubs, beautiful beaches, and unforgettable sunsets.',
+    startingDate: '2022-07-01',
+    endingDate: '2022-07-08',
+    price: 189900,
+    moods: {
+      nature: 50,
+      relax: 40,
+      history: 10,
+      culture: 30,
+      party: 100,
+    },
+  },
 ]

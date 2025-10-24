@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed...');
 
+  // Seed travels (used in both production and test environments)
   const travelsData = TRAVELS_DATA;
 
   for (const travel of travelsData) {
@@ -28,6 +29,7 @@ async function main() {
   }
 
   console.log('🎉 Database seeded successfully!');
+  console.log('ℹ️  Note: Test booking data is seeded separately in integration test setup');
 }
 
 main()
