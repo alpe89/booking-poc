@@ -16,17 +16,17 @@
   --color-weroad-950: #430907;
 
   /* Sand Colors */
-  --color-sand-50: #FDF9F5;
-  --color-sand-100: #F8F1EA;
-  --color-sand-200: #F0E4D9;
-  --color-sand-300: #E2CFBB;
-  --color-sand-400: #C4A889;
-  --color-sand-500: #A9805D;
-  --color-sand-600: #8C6442;
-  --color-sand-700: #6F4D32;
-  --color-sand-800: #543924;
-  --color-sand-900: #3C2818;
-  --color-sand-950: #24160C;
+  --color-sand-50: #F9FAFB;
+  --color-sand-100: #F3F4F6;
+  --color-sand-200: #E5E7EB;
+  --color-sand-300: #D1D5DB;
+  --color-sand-400: #9CA3AF;
+  --color-sand-500: #6B7280;
+  --color-sand-600: #4B5563;
+  --color-sand-700: #374151;
+  --color-sand-800: #1F2937;
+  --color-sand-900: #111827;
+  --color-sand-950: #030712;
 
   /* Ocean Colors */
   --color-ocean-50: #F3F6FC;
@@ -50,8 +50,8 @@ html,
 body {
   min-height: 100%;
   font-family: 'Poppins', 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  background-color: #fdf9f5;
-  color: #3C2818;
+  background-color: #ffffff;
+  color: #111827;
   scroll-behavior: smooth;
 }
 

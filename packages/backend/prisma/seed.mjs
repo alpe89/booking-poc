@@ -1,18 +1,12 @@
 import { PrismaClient } from '../generated/prisma/index.js';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { TRAVELS_DATA } from './seed-data.ts';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  const travelsPath = join(__dirname, '../../../samples/travels.json');
-  const travelsData = JSON.parse(readFileSync(travelsPath, 'utf-8'));
+  const travelsData = TRAVELS_DATA;
 
   for (const travel of travelsData) {
     await prisma.travel.upsert({

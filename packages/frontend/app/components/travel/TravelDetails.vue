@@ -13,55 +13,51 @@
         </p>
       </div>
 
-      <UDivider />
+      <USeparator />
 
       <TravelDateInfo
         :departure-date="formattedDepartureDate"
         :return-date="formattedReturnDate"
       />
 
-      <UDivider />
+      <USeparator />
 
-      <TravelMoodList
-        :title="moodTitle"
-        :moods="moodEntries"
-      />
+      <TravelMoodList :title="moodTitle" :moods="moodEntries" />
     </UCard>
 
-    <TravelIncludedCard
-      :title="includedTitle"
-      :items="includedItems"
-    />
+    <TravelIncludedCard :title="includedTitle" :items="includedItems" />
   </section>
 </template>
 
 <script setup lang="ts">
-import type { TravelSerialized } from '@booking/shared'
+import type { TravelSerialized } from "@booking/shared";
 
 type Props = {
-  travel: TravelSerialized
-  title?: string
-  moodTitle?: string
-  includedTitle?: string
-  includedItems?: string[]
-}
+  travel: TravelSerialized;
+  title?: string;
+  moodTitle?: string;
+  includedTitle?: string;
+  includedItems?: string[];
+};
 
 const props = withDefaults(defineProps<Props>(), {
   title: "Why you'll love this trip",
-  moodTitle: 'Travel mood',
+  moodTitle: "Travel mood",
   includedTitle: "What's included",
   includedItems: () => [
-    'Internal transportation, selected accommodations and immersive activities.',
-    'Local travel coach always with the group.',
-    'Pre-departure support and dedicated participant group.',
+    "Internal transportation, selected accommodations and immersive activities.",
+    "Local travel coach always with the group.",
+    "Pre-departure support and dedicated participant group.",
   ],
-})
+});
 
-const { formatDate } = useFormatters()
-const { getMoodEntries } = useMoods()
+const { formatDate } = useFormatters();
+const { getMoodEntries } = useMoods();
 
-const moodEntries = computed(() => getMoodEntries(props.travel.moods))
+const moodEntries = computed(() => getMoodEntries(props.travel.moods));
 
-const formattedDepartureDate = computed(() => formatDate(props.travel.startingDate))
-const formattedReturnDate = computed(() => formatDate(props.travel.endingDate))
+const formattedDepartureDate = computed(() =>
+  formatDate(props.travel.startingDate)
+);
+const formattedReturnDate = computed(() => formatDate(props.travel.endingDate));
 </script>

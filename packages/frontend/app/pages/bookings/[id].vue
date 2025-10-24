@@ -37,15 +37,20 @@
         @cancel="handleCancel"
       />
 
-      <UCard v-if="data.data.status === 'PENDING'" class="bg-gray-50 border border-gray-200">
+      <UCard
+        v-if="data.data.status === 'PENDING'"
+        class="bg-gray-50 border border-gray-200"
+      >
         <template #header>
-          <h2 class="text-lg font-semibold text-primary-700">Payment Information</h2>
+          <h2 class="text-lg font-semibold text-primary-700">
+            Payment Information
+          </h2>
         </template>
 
         <UAlert
           icon="i-heroicons-information-circle"
-          color="info"
-          variant="solid"
+          color="primary"
+          variant="outline"
           title="Test Mode"
           description='This is a POC. Click "Confirm & Pay" to simulate a successful payment.'
         />
@@ -55,101 +60,110 @@
 </template>
 
 <script setup lang="ts">
-import { BOOKING_CONFIG } from '~/config/booking'
+import { BOOKING_CONFIG } from "~/config/booking";
 
-const route = useRoute()
-const api = useApi()
-const toast = useToast()
+const route = useRoute();
+const api = useApi();
+const toast = useToast();
 
-const bookingId = route.params.id as string
+const bookingId = route.params.id as string;
 
 const { data, pending, error, refresh } = await useAsyncData(
   `booking-${bookingId}`,
   () => api.bookings.getById(bookingId)
-)
+);
 
-const isProcessing = ref(false)
+const isProcessing = ref(false);
 
 // Sync with server and return updated remaining time
 const syncWithServer = async (): Promise<number | null> => {
   try {
-    const response = await api.bookings.getById(bookingId)
+    const response = await api.bookings.getById(bookingId);
 
     // Only update if status changed
     if (response.data.status !== data.value?.data.status) {
       // Status changed, do a full refresh
-      await refresh()
+      await refresh();
     }
 
-    return response.meta.remainingTime
+    return response.meta.remainingTime;
   } catch (err) {
     // On error, just log it - don't disrupt the UI
-    console.error('Failed to sync with server:', err)
-    return null
+    console.error("Failed to sync with server:", err);
+    return null;
   }
-}
+};
 
 // Use countdown composable
-const { remainingTime, formattedTime, stop: stopCountdown } = useCountdown({
+const {
+  remainingTime,
+  formattedTime,
+  stop: stopCountdown,
+} = useCountdown({
   initialTime: data.value?.meta.remainingTime ?? null,
   onExpire: async () => {
     // When countdown expires, refresh to get latest status from server
-    await refresh()
+    await refresh();
   },
   syncInterval: BOOKING_CONFIG.SYNC_INTERVAL,
   onSync: syncWithServer,
-})
+});
 
 const handleConfirm = async () => {
   try {
-    isProcessing.value = true
-    const response = await api.bookings.confirm(bookingId, { paymentMethod: 'fake' })
+    isProcessing.value = true;
+    const response = await api.bookings.confirm(bookingId, {
+      paymentMethod: "fake",
+    });
 
     toast.add({
-      title: 'Payment successful!',
+      title: "Payment successful!",
       description: `Your booking has been confirmed. Transaction ID: ${response.meta.payment.transactionId}`,
-      color: 'success',
-    })
+      color: "success",
+    });
 
-    await refresh()
+    await refresh();
   } catch (err) {
     toast.add({
-      title: 'Payment failed',
-      description: err instanceof Error ? err.message : 'An error occurred',
-      color: 'error',
-    })
+      title: "Payment failed",
+      description: err instanceof Error ? err.message : "An error occurred",
+      color: "error",
+    });
   } finally {
-    isProcessing.value = false
+    isProcessing.value = false;
   }
-}
+};
 
 const handleCancel = async () => {
   try {
-    isProcessing.value = true
-    await api.bookings.cancel(bookingId)
+    isProcessing.value = true;
+    await api.bookings.cancel(bookingId);
 
     toast.add({
-      title: 'Booking cancelled',
-      description: 'Your booking has been cancelled successfully',
-      color: 'neutral',
-    })
+      title: "Booking cancelled",
+      description: "Your booking has been cancelled successfully",
+      color: "neutral",
+    });
 
-    await refresh()
+    await refresh();
   } catch (err) {
     toast.add({
-      title: 'Cancellation failed',
-      description: err instanceof Error ? err.message : 'An error occurred',
-      color: 'error',
-    })
+      title: "Cancellation failed",
+      description: err instanceof Error ? err.message : "An error occurred",
+      color: "error",
+    });
   } finally {
-    isProcessing.value = false
+    isProcessing.value = false;
   }
-}
+};
 
 // Stop countdown when status changes from PENDING
-watch(() => data.value?.data.status, (newStatus) => {
-  if (newStatus !== 'PENDING') {
-    stopCountdown()
+watch(
+  () => data.value?.data.status,
+  (newStatus) => {
+    if (newStatus !== "PENDING") {
+      stopCountdown();
+    }
   }
-})
+);
 </script>

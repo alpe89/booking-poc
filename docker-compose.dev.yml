@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-booking}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-booking} -d ${POSTGRES_DB:-booking_db}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
       postgres:
         condition: service_healthy
     working_dir: /app/packages/backend
-    command: pnpm dev
+    command: sh -c "pnpm prisma migrate deploy && pnpm prisma db seed && pnpm dev"
 
   # Nuxt 4 Frontend (Development with hot-reload)
   frontend:
@@ -47,9 +47,12 @@ services:
     container_name: booking-frontend-dev
     restart: unless-stopped
     environment:
+      # Client-side API calls (from browser)
       - NUXT_PUBLIC_API_BASE=http://localhost:3000/api
+      # Server-side API calls (from Nuxt SSR)
+      - API_BASE_URL=http://backend:3000/api
     ports:
-      - '3001:3000'
+      - '3001:4000'
     volumes:
       - ./packages/frontend:/app/packages/frontend
       - ./packages/shared:/app/packages/shared

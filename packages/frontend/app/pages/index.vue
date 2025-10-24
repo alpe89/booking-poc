@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-16 pb-20">
-    <HeroSection
+    <HomeHeroSection
       title="Transform every journey into an unforgettable memory"
       subtitle="We select the best destinations, take care of every logistical detail, and support you with local experts to experience the essence of each location."
       :stats="heroStats"

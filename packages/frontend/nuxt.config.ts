@@ -16,11 +16,13 @@ export default defineNuxtConfig({
   css: ["~/assets/css/tailwind.css"],
 
   runtimeConfig: {
+    // Server-side API base (used by Nuxt SSR, can use Docker service names)
     apiBaseInternal:
-      process.env.NUXT_API_BASE_INTERNAL ||
+      process.env.API_BASE_URL ||
       process.env.NUXT_PUBLIC_API_BASE ||
       "http://localhost:3000/api",
     public: {
+      // Client-side API base (used by browser, must use localhost or public URL)
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:3000/api",
     },
   },
@@ -54,7 +56,7 @@ export default defineNuxtConfig({
 
   typescript: {
     strict: true,
-    typeCheck: false, // Disable during build for performance (use IDE/CI for type checking)
+    typeCheck: false,
   },
 
   postcss: {

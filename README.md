@@ -227,9 +227,19 @@ git clone <repository-url>
 cd booking-poc
 
 # Start all services
-docker-compose up
+pnpm docker:prod
 
 # Or with rebuild
+pnpm docker:prod:build
+
+# Stop services
+pnpm docker:prod:down
+```
+
+Or using Docker Compose directly:
+
+```bash
+docker-compose up
 docker-compose up --build
 ```
 
@@ -237,9 +247,19 @@ docker-compose up --build
 
 ```bash
 # Start all services with hot-reload
-docker-compose -f docker-compose.dev.yml up
+pnpm docker:dev
 
 # Or with rebuild
+pnpm docker:dev:build
+
+# Stop services
+pnpm docker:dev:down
+```
+
+Or using Docker Compose directly:
+
+```bash
+docker-compose -f docker-compose.dev.yml up
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
@@ -272,8 +292,19 @@ pnpm dev:frontend   # http://localhost:3001
 ### Available pnpm Scripts
 
 ```bash
-# Development
-pnpm dev              # Start Docker Compose (all services)
+# Docker Commands
+pnpm docker:dev              # Start dev mode (hot-reload)
+pnpm docker:dev:build        # Start dev mode with rebuild
+pnpm docker:dev:down         # Stop dev services
+pnpm docker:prod             # Start production mode
+pnpm docker:prod:build       # Start production with rebuild
+pnpm docker:prod:down        # Stop production services
+pnpm docker:clean            # Remove all containers and volumes
+pnpm docker:logs             # View all logs (follow mode)
+pnpm docker:logs:backend     # View backend logs only
+pnpm docker:logs:frontend    # View frontend logs only
+
+# Local Development (without Docker)
 pnpm dev:backend      # Start only backend (local)
 pnpm dev:frontend     # Start only frontend (local)
 
@@ -290,7 +321,7 @@ pnpm test:frontend    # Test only frontend
 # Linting
 pnpm lint             # Lint all workspaces
 
-# Database
+# Database (requires backend running)
 pnpm db:seed          # Seed database with sample data
 pnpm db:migrate       # Run migrations
 pnpm db:reset         # Reset database
@@ -320,6 +351,59 @@ pnpm db:studio        # Open Prisma Studio (GUI for database)
 - **Component Tests**: Vitest + @vue/test-utils for Vue components
 - **Coverage**: 53 tests passing with comprehensive mocks for Nuxt composables
 - **E2E Tests**: Playwright (planned, not yet implemented)
+
+---
+
+## CI/CD Pipeline
+
+The project uses **GitHub Actions** for continuous integration and continuous deployment.
+
+### CI Workflow (Main Branch)
+
+**Trigger**: Every push to `main` or pull request to `main`
+
+**Steps**:
+
+1. Checkout code
+2. Setup Node.js 22.x and pnpm 9
+3. Install dependencies
+4. Run linter (backend + frontend)
+5. Run unit tests (backend + frontend)
+6. Build (backend + frontend)
+
+**Duration**: ~2-3 minutes
+
+**File**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+### CD Workflow (Tags/Releases)
+
+**Trigger**: Push to tags matching `v*.*.*` or published release
+
+**Steps**:
+
+1. Checkout code
+2. Setup Node.js 22.x and pnpm 9
+3. Setup PostgreSQL service container
+4. Install dependencies
+5. Run linter (backend + frontend)
+6. Run unit tests (backend + frontend)
+7. Setup database (migrations + seed)
+8. **Run integration tests** (backend with real PostgreSQL)
+9. Build (backend + frontend)
+10. Create deployment artifacts (tarball)
+11. Upload artifacts to GitHub Actions
+
+**Duration**: ~5-7 minutes
+
+**File**: [`.github/workflows/cd.yml`](.github/workflows/cd.yml)
+
+### GitHub Actions Free Tier
+
+- **2000 minutes/month** for private repositories (unlimited for public)
+- Auto-blocks when limit exceeded (no charges)
+- CI runs: ~2 min × 30 pushes = 60 min/month
+- CD runs: ~5 min × 4 releases = 20 min/month
+- **Total**: ~80 min/month (well within limits)
 
 ---
 
