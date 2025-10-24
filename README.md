@@ -356,7 +356,7 @@ pnpm db:studio        # Open Prisma Studio (GUI for database)
 
 ## CI/CD Pipeline
 
-The project uses **GitHub Actions** for continuous integration and continuous deployment.
+The project uses **GitHub Actions** for continuous integration and continuous deployment with a complete test suite.
 
 ### CI Workflow (Main Branch)
 
@@ -367,9 +367,11 @@ The project uses **GitHub Actions** for continuous integration and continuous de
 1. Checkout code
 2. Setup Node.js 22.x and pnpm 9
 3. Install dependencies
-4. Run linter (backend + frontend)
-5. Run unit tests (backend + frontend)
-6. Build (backend + frontend)
+4. Build shared package
+5. Generate Prisma client
+6. Run linter (backend + frontend)
+7. Run unit tests (backend + frontend)
+8. Build (backend + frontend)
 
 **Duration**: ~2-3 minutes
 
@@ -383,27 +385,29 @@ The project uses **GitHub Actions** for continuous integration and continuous de
 
 1. Checkout code
 2. Setup Node.js 22.x and pnpm 9
-3. Setup PostgreSQL service container
+3. Setup PostgreSQL service container (v15-alpine)
 4. Install dependencies
-5. Run linter (backend + frontend)
-6. Run unit tests (backend + frontend)
-7. Setup database (migrations + seed)
-8. **Run integration tests** (backend with real PostgreSQL)
-9. Build (backend + frontend)
-10. Create deployment artifacts (tarball)
-11. Upload artifacts to GitHub Actions
+5. Build shared package
+6. Generate Prisma client
+7. Run linter (backend + frontend)
+8. Run unit tests (backend + frontend)
+9. **Setup test database** (migrations + test data seeding with `setup-test-db.mjs`)
+10. **Run integration tests** (46 tests including concurrency scenarios)
+11. Build (backend + frontend)
+12. Create deployment artifacts (tarball)
+13. Upload artifacts to GitHub Actions
 
-**Duration**: ~5-7 minutes
+**Duration**: ~4-5 minutes
 
 **File**: [`.github/workflows/cd.yml`](.github/workflows/cd.yml)
 
-### GitHub Actions Free Tier
+**Key Features**:
 
-- **2000 minutes/month** for private repositories (unlimited for public)
-- Auto-blocks when limit exceeded (no charges)
-- CI runs: ~2 min × 30 pushes = 60 min/month
-- CD runs: ~5 min × 4 releases = 20 min/month
-- **Total**: ~80 min/month (well within limits)
+- ✅ Complete test coverage with unit + integration tests
+- ✅ Real PostgreSQL database for integration tests
+- ✅ Separate test data seeding (doesn't affect production seed)
+- ✅ Concurrency and race condition tests
+- ✅ All 46 integration tests passing
 
 ---
 
