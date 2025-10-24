@@ -48,15 +48,13 @@
         <div class="grid gap-8 md:grid-cols-3">
           <!-- Brand Section -->
           <div class="space-y-3">
-            <div
-              class="flex items-center gap-2 text-lg font-semibold text-primary-700"
-            >
+            <div class="flex items-center gap-2 text-lg font-semibold text-primary-700">
               <UIcon name="i-heroicons-globe-alt" class="h-5 w-5" />
               <span>Travel Booking</span>
             </div>
             <p class="text-sm text-sand-600">
-              Book your next adventure with confidence. Selected destinations,
-              expert guides, and unforgettable experiences.
+              Book your next adventure with confidence. Selected destinations, expert guides, and
+              unforgettable experiences.
             </p>
           </div>
 
@@ -65,10 +63,7 @@
             <h3 class="text-sm font-semibold text-sand-900">Quick Links</h3>
             <ul class="space-y-2 text-sm">
               <li>
-                <NuxtLink
-                  to="/"
-                  class="text-sand-600 transition hover:text-primary-700"
-                >
+                <NuxtLink to="/" class="text-sand-600 transition hover:text-primary-700">
                   Browse Travels
                 </NuxtLink>
               </li>

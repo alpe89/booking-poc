@@ -33,11 +33,7 @@
 
       <div v-else-if="data" class="mt-10 space-y-10">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          <TravelCard
-            v-for="travel in data.data"
-            :key="travel.id"
-            :travel="travel"
-          />
+          <TravelCard v-for="travel in data.data" :key="travel.id" :travel="travel" />
         </div>
 
         <div v-if="data.meta.total > data.meta.limit" class="flex flex-col items-center gap-3">
@@ -47,9 +43,7 @@
             :total="data.meta.total"
             :ui="{ root: 'gap-2' }"
           />
-          <p class="text-sm text-sand-500">
-            Page {{ currentPage }} of {{ totalPages }}
-          </p>
+          <p class="text-sm text-sand-500">Page {{ currentPage }} of {{ totalPages }}</p>
         </div>
       </div>
     </UContainer>

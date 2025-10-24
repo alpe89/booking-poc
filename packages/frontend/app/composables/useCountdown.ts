@@ -34,13 +34,7 @@ type UseCountdownOptions = {
 }
 
 export const useCountdown = (options: UseCountdownOptions) => {
-  const {
-    initialTime,
-    onExpire,
-    onSync,
-    countdownInterval = 1000,
-    syncInterval = 30000,
-  } = options
+  const { initialTime, onExpire, onSync, countdownInterval = 1000, syncInterval = 30000 } = options
 
   const remainingTime = ref<number | null>(initialTime)
   let countdownIntervalId: ReturnType<typeof setInterval> | null = null

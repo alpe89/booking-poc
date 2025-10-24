@@ -331,9 +331,9 @@ describe('BookingService', () => {
       const confirmedBooking = mockBookings[1];
       vi.spyOn(prisma.booking, 'findUnique').mockResolvedValue(confirmedBooking);
 
-      await expect(
-        service.confirm(confirmedBooking.id, { paymentMethod: 'fake' }),
-      ).rejects.toThrow(ConflictException);
+      await expect(service.confirm(confirmedBooking.id, { paymentMethod: 'fake' })).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should throw ConflictException when booking has expired', async () => {

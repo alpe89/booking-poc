@@ -49,40 +49,40 @@
 </template>
 
 <script setup lang="ts">
-import type { BookingSerialized } from "@booking/shared";
+import type { BookingSerialized } from '@booking/shared'
 
 type Props = {
-  booking: BookingSerialized;
-  remainingTime?: number | null;
-  formattedTime?: string;
-  warningThreshold?: number;
-  isProcessing?: boolean;
-};
+  booking: BookingSerialized
+  remainingTime?: number | null
+  formattedTime?: string
+  warningThreshold?: number
+  isProcessing?: boolean
+}
 
 const props = withDefaults(defineProps<Props>(), {
   remainingTime: null,
-  formattedTime: "0m 0s",
+  formattedTime: '0m 0s',
   warningThreshold: 300,
   isProcessing: false,
-});
+})
 
 defineEmits<{
-  confirm: [];
-  cancel: [];
-}>();
+  confirm: []
+  cancel: []
+}>()
 
-const { formatPrice } = useFormatters();
+const { formatPrice } = useFormatters()
 
 const statusColor = computed(() => {
   switch (props.booking.status) {
-    case "CONFIRMED":
-      return "success";
-    case "EXPIRED":
-      return "error";
+    case 'CONFIRMED':
+      return 'success'
+    case 'EXPIRED':
+      return 'error'
     default:
-      return "warning";
+      return 'warning'
   }
-});
+})
 
-const formattedAmount = computed(() => formatPrice(props.booking.totalAmount));
+const formattedAmount = computed(() => formatPrice(props.booking.totalAmount))
 </script>

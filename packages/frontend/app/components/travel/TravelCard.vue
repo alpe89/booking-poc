@@ -20,7 +20,10 @@
     <div class="flex flex-wrap gap-4 text-sm text-sand-500">
       <div class="flex items-center gap-2">
         <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-primary-500" />
-        <span>{{ formatDateShort(travel.startingDate) }} – {{ formatDateShort(travel.endingDate) }}</span>
+        <span
+          >{{ formatDateShort(travel.startingDate) }} –
+          {{ formatDateShort(travel.endingDate) }}</span
+        >
       </div>
       <div class="flex items-center gap-2">
         <UIcon name="i-heroicons-sparkles" class="h-5 w-5 text-primary-500" />

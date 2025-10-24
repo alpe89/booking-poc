@@ -1,10 +1,28 @@
 import { vi } from 'vitest'
 import { config } from '@vue/test-utils'
 import { ref, reactive, computed, watch, readonly } from 'vue'
-
-// Import real composables that should work in tests
 import { useFormatters } from './app/composables/useFormatters'
 import { useMoods } from './app/composables/useMoods'
+
+declare global {
+  var ref: typeof import('vue').ref
+  var reactive: typeof import('vue').reactive
+  var computed: typeof import('vue').computed
+  var watch: typeof import('vue').watch
+  var readonly: typeof import('vue').readonly
+  var useFormatters: typeof import('./app/composables/useFormatters').useFormatters
+  var useMoods: typeof import('./app/composables/useMoods').useMoods
+  var useApi: typeof import('./app/composables/useApi').useApi
+  var useToast: () => {
+    add: (params: {
+      title?: string
+      description?: string
+      color?: string
+      timeout?: number
+    }) => void
+  }
+  var navigateTo: (to: string) => Promise<void>
+}
 
 // Mock Nuxt auto-imported composables
 vi.mock('#app', () => ({
@@ -76,7 +94,8 @@ config.global.stubs = {
     template: '<div class="skeleton" />',
   },
   UInput: {
-    template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+    template:
+      '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
     props: ['modelValue'],
   },
   NuxtLink: {

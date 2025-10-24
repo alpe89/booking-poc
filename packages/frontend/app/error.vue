@@ -5,10 +5,7 @@
         <!-- Error Icon -->
         <div class="flex justify-center">
           <div class="flex h-20 w-20 items-center justify-center rounded-full bg-primary-100">
-            <UIcon
-              :name="errorIcon"
-              class="h-10 w-10 text-primary-600"
-            />
+            <UIcon :name="errorIcon" class="h-10 w-10 text-primary-600" />
           </div>
         </div>
 
@@ -29,12 +26,7 @@
 
         <!-- Actions -->
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <UButton
-            size="lg"
-            color="primary"
-            icon="i-heroicons-home"
-            @click="handleClearError"
-          >
+          <UButton size="lg" color="primary" icon="i-heroicons-home" @click="handleClearError">
             Go to Home
           </UButton>
 
@@ -55,8 +47,8 @@
           <p>
             If the problem persists, please contact support or
             <NuxtLink to="/" class="text-primary-600 hover:text-primary-700 underline">
-              return to the homepage
-            </NuxtLink>.
+              return to the homepage </NuxtLink
+            >.
           </p>
         </div>
       </div>

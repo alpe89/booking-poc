@@ -27,9 +27,7 @@ describe('TravelController (integration)', () => {
 
   describe('GET /api/travels', () => {
     it('should return paginated travels with default parameters', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/api/travels').expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('meta');
@@ -78,25 +76,19 @@ describe('TravelController (integration)', () => {
     });
 
     it('should reject invalid page parameter (less than 1)', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels?page=0')
-        .expect(400);
+      const response = await request(app.getHttpServer()).get('/api/travels?page=0').expect(400);
 
       expect(response.body).toHaveProperty('message');
     });
 
     it('should reject invalid limit parameter (greater than 100)', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels?limit=101')
-        .expect(400);
+      const response = await request(app.getHttpServer()).get('/api/travels?limit=101').expect(400);
 
       expect(response.body).toHaveProperty('message');
     });
 
     it('should reject invalid limit parameter (less than 1)', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels?limit=0')
-        .expect(400);
+      const response = await request(app.getHttpServer()).get('/api/travels?limit=0').expect(400);
 
       expect(response.body).toHaveProperty('message');
     });
@@ -110,9 +102,7 @@ describe('TravelController (integration)', () => {
     });
 
     it('should return travels with correct structure', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels?limit=1')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/api/travels?limit=1').expect(200);
 
       expect(response.body.data.length).toBeGreaterThan(0);
 
@@ -139,9 +129,7 @@ describe('TravelController (integration)', () => {
     });
 
     it('should return specific test travel data', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/travels?limit=10')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/api/travels?limit=10').expect(200);
 
       // Verify we have our seeded data
       const jordanTravel = response.body.data.find((t: any) => t.slug === 'jordan-360');
@@ -238,8 +226,7 @@ describe('TravelController (integration)', () => {
 
     it('should accept valid slug with numbers and hyphens', async () => {
       // This will return 404 but should pass validation
-      const response = await request(app.getHttpServer())
-        .get('/api/travels/valid-slug-123');
+      const response = await request(app.getHttpServer()).get('/api/travels/valid-slug-123');
 
       // Either 200 (found) or 404 (not found), but not 400 (validation error)
       expect([200, 404]).toContain(response.status);

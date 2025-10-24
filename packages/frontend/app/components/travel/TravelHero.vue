@@ -5,21 +5,10 @@
     <div
       class="absolute inset-0 mix-blend-soft-light"
       style="
-        background-image: radial-gradient(
-            circle at 20% 20%,
-            rgba(255, 255, 255, 0.25),
-            transparent 60%
-          ),
-          radial-gradient(
-            circle at 80% 0%,
-            rgba(255, 255, 255, 0.18),
-            transparent 55%
-          ),
-          radial-gradient(
-            circle at 50% 85%,
-            rgba(255, 255, 255, 0.12),
-            transparent 50%
-          );
+        background-image:
+          radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 60%),
+          radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.18), transparent 55%),
+          radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.12), transparent 50%);
       "
     />
     <UContainer class="relative z-10 py-14 sm:py-16">
@@ -37,38 +26,21 @@
         <span class="hidden sm:block">{{ heroSummary.duration }} tour</span>
       </div>
 
-      <div
-        class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start"
-      >
+      <div class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-start">
         <div class="space-y-6">
           <div class="space-y-4">
-            <UBadge
-              color="neutral"
-              variant="soft"
-              class="bg-white/20 text-white backdrop-blur-sm"
-            >
+            <UBadge color="neutral" variant="soft" class="bg-white/20 text-white backdrop-blur-sm">
               {{ heroSummary.tagline }}
             </UBadge>
-            <h1
-              class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl"
-            >
+            <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
               {{ travel.name }}
             </h1>
           </div>
 
           <div class="flex flex-wrap gap-4 text-sm text-white/85">
-            <TravelInfoPill
-              icon="i-heroicons-calendar-days"
-              :text="dateRangeText"
-            />
-            <TravelInfoPill
-              icon="i-heroicons-user-group"
-              :text="seatSummary"
-            />
-            <TravelInfoPill
-              icon="i-heroicons-currency-euro"
-              :text="priceText"
-            />
+            <TravelInfoPill icon="i-heroicons-calendar-days" :text="dateRangeText" />
+            <TravelInfoPill icon="i-heroicons-user-group" :text="seatSummary" />
+            <TravelInfoPill icon="i-heroicons-currency-euro" :text="priceText" />
           </div>
 
           <div class="flex flex-wrap gap-3 pt-2">
@@ -113,7 +85,8 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {
   featureCardTitle: 'What awaits you on this journey',
-  featureCardDescription: 'Selected groups, certified travel coach and logistics handled in every detail. Experience a shared adventure worry-free.',
+  featureCardDescription:
+    'Selected groups, certified travel coach and logistics handled in every detail. Experience a shared adventure worry-free.',
   features: () => [
     {
       icon: 'i-heroicons-user-group',
@@ -143,7 +116,9 @@ const moodEntries = computed(() => getMoodEntries(props.travel.moods))
 const topMoods = computed(() =>
   moodEntries.value
     .slice()
-    .sort((a: { mood: string; value: number }, b: { mood: string; value: number }) => b.value - a.value)
+    .sort(
+      (a: { mood: string; value: number }, b: { mood: string; value: number }) => b.value - a.value
+    )
     .slice(0, 3)
 )
 
@@ -160,11 +135,9 @@ const seatSummary = computed(() => {
   return `${props.availableSeats} seats still available`
 })
 
-const dateRangeText = computed(() =>
-  `${formatDate(props.travel.startingDate)} – ${formatDate(props.travel.endingDate)}`
+const dateRangeText = computed(
+  () => `${formatDate(props.travel.startingDate)} – ${formatDate(props.travel.endingDate)}`
 )
 
-const priceText = computed(() =>
-  `${formatPrice(props.travel.price)} per person`
-)
+const priceText = computed(() => `${formatPrice(props.travel.price)} per person`)
 </script>

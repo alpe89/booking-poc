@@ -546,12 +546,8 @@ describe('BookingController (integration)', () => {
       const results = await Promise.allSettled(concurrentRequests);
 
       // Count successful (201) and failed (409) requests
-      const successful = results.filter(
-        (r) => r.status === 'fulfilled' && r.value.status === 201,
-      );
-      const conflicts = results.filter(
-        (r) => r.status === 'fulfilled' && r.value.status === 409,
-      );
+      const successful = results.filter((r) => r.status === 'fulfilled' && r.value.status === 201);
+      const conflicts = results.filter((r) => r.status === 'fulfilled' && r.value.status === 409);
 
       // Exactly 5 should succeed (available seats)
       expect(successful.length).toBe(5);
@@ -612,12 +608,8 @@ describe('BookingController (integration)', () => {
 
       const results = await Promise.allSettled(requests);
 
-      const successful = results.filter(
-        (r) => r.status === 'fulfilled' && r.value.status === 201,
-      );
-      const conflicts = results.filter(
-        (r) => r.status === 'fulfilled' && r.value.status === 409,
-      );
+      const successful = results.filter((r) => r.status === 'fulfilled' && r.value.status === 201);
+      const conflicts = results.filter((r) => r.status === 'fulfilled' && r.value.status === 409);
 
       // 2 should succeed (4 seats booked), 1 should fail (would need 2 but only 1 left)
       expect(successful.length).toBe(2);

@@ -1,6 +1,9 @@
 packages:
   - packages/*
 
+ignoredBuiltDependencies:
+  - unrs-resolver
+
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@parcel/watcher'

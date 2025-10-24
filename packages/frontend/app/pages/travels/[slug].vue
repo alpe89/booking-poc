@@ -22,9 +22,7 @@
     <template v-else-if="travel">
       <TravelHero :travel="travel" :available-seats="availableSeats" />
 
-      <UContainer
-        class="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
-      >
+      <UContainer class="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <TravelDetails :travel="travel" />
 
         <aside class="lg:sticky lg:top-24">
@@ -42,27 +40,23 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  ApiResponse,
-  BookingSerialized,
-  BookingReserveMeta,
-} from "@booking/shared";
+import type { ApiResponse, BookingSerialized, BookingReserveMeta } from '@booking/shared'
 
-const route = useRoute();
-const api = useApi();
+const route = useRoute()
+const api = useApi()
 
-const slug = route.params.slug as string;
+const slug = route.params.slug as string
 
 const { data, pending, error } = await useAsyncData(`travel-${slug}`, () =>
   api.travels.getBySlug(slug)
-);
+)
 
-const travel = computed(() => data.value?.data);
-const availableSeats = computed(() => data.value?.meta?.availableSeats ?? 0);
+const travel = computed(() => data.value?.data)
+const availableSeats = computed(() => data.value?.meta?.availableSeats ?? 0)
 
 const handleBookingSuccess = async (
   response: ApiResponse<BookingSerialized, BookingReserveMeta>
 ) => {
-  await navigateTo(`/bookings/${response.data.id}`);
-};
+  await navigateTo(`/bookings/${response.data.id}`)
+}
 </script>

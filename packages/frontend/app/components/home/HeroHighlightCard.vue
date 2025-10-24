@@ -1,7 +1,9 @@
 <template>
   <div class="relative">
     <div class="absolute inset-0 -translate-x-6 translate-y-6 rounded-3xl bg-white/15 blur-2xl" />
-    <UCard class="relative overflow-hidden rounded-3xl border border-white/20 bg-white/90 text-primary-700 shadow-xl backdrop-blur">
+    <UCard
+      class="relative overflow-hidden rounded-3xl border border-white/20 bg-white/90 text-primary-700 shadow-xl backdrop-blur"
+    >
       <div class="space-y-6 p-8">
         <h2 class="text-2xl font-semibold">{{ title }}</h2>
         <div class="space-y-4">

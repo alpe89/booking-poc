@@ -1,43 +1,43 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @theme static {
   /* WeRoad Brand Colors */
-  --color-weroad-50: #FFF5F3;
-  --color-weroad-100: #FFE5E2;
-  --color-weroad-200: #FFC7C0;
-  --color-weroad-300: #FFA49A;
-  --color-weroad-400: #FF7B6F;
-  --color-weroad-500: #FF4338;
-  --color-weroad-600: #E2342A;
-  --color-weroad-700: #BD271F;
-  --color-weroad-800: #9A1E17;
-  --color-weroad-900: #7C1813;
+  --color-weroad-50: #fff5f3;
+  --color-weroad-100: #ffe5e2;
+  --color-weroad-200: #ffc7c0;
+  --color-weroad-300: #ffa49a;
+  --color-weroad-400: #ff7b6f;
+  --color-weroad-500: #ff4338;
+  --color-weroad-600: #e2342a;
+  --color-weroad-700: #bd271f;
+  --color-weroad-800: #9a1e17;
+  --color-weroad-900: #7c1813;
   --color-weroad-950: #430907;
 
   /* Sand Colors */
-  --color-sand-50: #F9FAFB;
-  --color-sand-100: #F3F4F6;
-  --color-sand-200: #E5E7EB;
-  --color-sand-300: #D1D5DB;
-  --color-sand-400: #9CA3AF;
-  --color-sand-500: #6B7280;
-  --color-sand-600: #4B5563;
+  --color-sand-50: #f9fafb;
+  --color-sand-100: #f3f4f6;
+  --color-sand-200: #e5e7eb;
+  --color-sand-300: #d1d5db;
+  --color-sand-400: #9ca3af;
+  --color-sand-500: #6b7280;
+  --color-sand-600: #4b5563;
   --color-sand-700: #374151;
-  --color-sand-800: #1F2937;
+  --color-sand-800: #1f2937;
   --color-sand-900: #111827;
   --color-sand-950: #030712;
 
   /* Ocean Colors */
-  --color-ocean-50: #F3F6FC;
-  --color-ocean-100: #E2E8F8;
-  --color-ocean-200: #C5D0F1;
-  --color-ocean-300: #9AB0E6;
-  --color-ocean-400: #708ED8;
-  --color-ocean-500: #3F66C3;
-  --color-ocean-600: #2E4FA8;
-  --color-ocean-700: #253E84;
-  --color-ocean-800: #1F3368;
+  --color-ocean-50: #f3f6fc;
+  --color-ocean-100: #e2e8f8;
+  --color-ocean-200: #c5d0f1;
+  --color-ocean-300: #9ab0e6;
+  --color-ocean-400: #708ed8;
+  --color-ocean-500: #3f66c3;
+  --color-ocean-600: #2e4fa8;
+  --color-ocean-700: #253e84;
+  --color-ocean-800: #1f3368;
   --color-ocean-900: #192950;
   --color-ocean-950: #101834;
 }

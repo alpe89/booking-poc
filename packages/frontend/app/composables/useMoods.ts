@@ -23,8 +23,8 @@ export const useMoods = () => {
    */
   const getMoodEntries = (moods: TravelSerialized['moods']) => {
     return Object.entries(moods)
-      .map(([mood, value]) => ({ mood, value }))
-      .filter(({ value }) => value > 0)
+      .map(([mood, moodValue]) => ({ mood, value: moodValue }))
+      .filter((entry) => entry.value > 0)
   }
 
   /**
@@ -35,7 +35,7 @@ export const useMoods = () => {
     const topMood = getTopMoods(moods, 1)[0]
     if (!topMood) return 'Explorer'
 
-    const [mood, value] = topMood
+    const [mood] = topMood
 
     // Simple heuristic: party mood > 50 = Party, otherwise use top mood name
     if (moods.party > 50) return 'Party'

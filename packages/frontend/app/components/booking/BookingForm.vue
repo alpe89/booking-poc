@@ -8,9 +8,7 @@
           variant="soft"
           size="lg"
         >
-          {{
-            isSoldOut ? "Sold out" : limitedStock ? "Last seats" : "Available"
-          }}
+          {{ isSoldOut ? 'Sold out' : limitedStock ? 'Last seats' : 'Available' }}
         </UBadge>
       </div>
 
@@ -42,19 +40,9 @@
 
       <USeparator class="mt-3" />
 
-      <UForm
-        :schema="bookingSchema"
-        :state="form"
-        class="space-y-5"
-        @submit="handleSubmit"
-      >
+      <UForm :schema="bookingSchema" :state="form" class="space-y-5" @submit="handleSubmit">
         <div class="my-4">
-          <UFormField
-            label="Email"
-            name="email"
-            required
-            :ui="{ label: 'text-sand-500 py-1' }"
-          >
+          <UFormField label="Email" name="email" required :ui="{ label: 'text-sand-500 py-1' }">
             <UInput
               v-model="form.email"
               type="email"
@@ -89,8 +77,9 @@
             />
             <template #hint>
               <span class="text-xs text-sand-500">
-                Up to {{ BOOKING_CONFIG.MAX_SEATS_PER_BOOKING }} seats per
-                booking ({{ maxBookableSeats }}
+                Up to {{ BOOKING_CONFIG.MAX_SEATS_PER_BOOKING }} seats per booking ({{
+                  maxBookableSeats
+                }}
                 available)
               </span>
             </template>
@@ -101,9 +90,7 @@
 
         <div class="rounded-lg border border-sand-200 bg-sand-50 px-5 py-4">
           <p class="text-sm text-sand-600">Trip total</p>
-          <p class="mt-1 text-3xl font-semibold text-primary-600">
-            €{{ totalAmount }}
-          </p>
+          <p class="mt-1 text-3xl font-semibold text-primary-600">€{{ totalAmount }}</p>
         </div>
 
         <UButton
@@ -114,7 +101,7 @@
           :disabled="isSubmitting"
           :loading="isSubmitting"
         >
-          {{ isSubmitting ? "Booking in progress..." : "Book now" }}
+          {{ isSubmitting ? 'Booking in progress...' : 'Book now' }}
         </UButton>
       </UForm>
     </template>
@@ -127,113 +114,105 @@ import type {
   ApiResponse,
   BookingSerialized,
   BookingReserveMeta,
-} from "@booking/shared";
-import { z } from "zod";
-import { BOOKING_CONFIG } from "~/config/booking";
+} from '@booking/shared'
+import { z } from 'zod'
+import { BOOKING_CONFIG } from '~/config/booking'
 
 type Props = {
-  travelId: string;
-  pricePerSeat: number;
-  availableSeats: number;
-  handleApiCall?: boolean;
-};
+  travelId: string
+  pricePerSeat: number
+  availableSeats: number
+  handleApiCall?: boolean
+}
 
 const props = withDefaults(defineProps<Props>(), {
   handleApiCall: false,
-});
+})
 
 const emit = defineEmits<{
-  submit: [data: ReserveBookingDto];
-  success: [response: ApiResponse<BookingSerialized, BookingReserveMeta>];
-  error: [error: Error];
-}>();
+  submit: [data: ReserveBookingDto]
+  success: [response: ApiResponse<BookingSerialized, BookingReserveMeta>]
+  error: [error: Error]
+}>()
 
-const api = useApi();
-const toast = useToast();
-const { formatPrice } = useFormatters();
+const api = useApi()
+const toast = useToast()
+const { formatPrice } = useFormatters()
 
-const isSubmitting = ref(false);
+const isSubmitting = ref(false)
 
 const form = reactive<ReserveBookingDto>({
-  email: "",
+  email: '',
   seats: 1,
   travelId: props.travelId,
-});
+})
 
-const isSoldOut = computed(() => props.availableSeats <= 0);
+const isSoldOut = computed(() => props.availableSeats <= 0)
 const limitedStock = computed(
-  () =>
-    props.availableSeats > 0 &&
-    props.availableSeats <= BOOKING_CONFIG.LOW_STOCK_THRESHOLD
-);
+  () => props.availableSeats > 0 && props.availableSeats <= BOOKING_CONFIG.LOW_STOCK_THRESHOLD
+)
 const maxBookableSeats = computed(() =>
-  Math.max(
-    1,
-    Math.min(props.availableSeats, BOOKING_CONFIG.MAX_SEATS_PER_BOOKING)
-  )
-);
+  Math.max(1, Math.min(props.availableSeats, BOOKING_CONFIG.MAX_SEATS_PER_BOOKING))
+)
 
 // Dynamic validation schema that considers available seats
 const bookingSchema = computed(() =>
   z.object({
-    email: z.string().email("Invalid email format"),
+    email: z.string().email('Invalid email format'),
     seats: z
       .number()
-      .int("Seats must be an integer")
-      .min(1, "Must reserve at least 1 seat")
-      .max(
-        maxBookableSeats.value,
-        `Cannot reserve more than ${maxBookableSeats.value} seats`
-      ),
-    travelId: z.string().uuid("Travel ID must be a valid UUID"),
+      .int('Seats must be an integer')
+      .min(1, 'Must reserve at least 1 seat')
+      .max(maxBookableSeats.value, `Cannot reserve more than ${maxBookableSeats.value} seats`),
+    travelId: z.string().uuid('Travel ID must be a valid UUID'),
   })
-);
+)
 
 const totalAmount = computed(() => {
-  return formatPrice(props.pricePerSeat * form.seats).replace("€", "");
-});
+  return formatPrice(props.pricePerSeat * form.seats).replace('€', '')
+})
 
 const handleSubmit = async (event: { data: ReserveBookingDto }) => {
   if (props.handleApiCall) {
     try {
-      isSubmitting.value = true;
-      const response = await api.bookings.reserve(event.data);
+      isSubmitting.value = true
+      const response = await api.bookings.reserve(event.data)
 
       toast.add({
-        title: "Booking confirmed!",
-        description: `Your booking expires on ${new Date(
-          response.meta.expiresAt
-        ).toLocaleString("en-US")}`,
-        color: "success",
-      });
+        title: 'Booking confirmed!',
+        description: `Your booking expires on ${new Date(response.meta.expiresAt).toLocaleString(
+          'en-US'
+        )}`,
+        color: 'success',
+      })
 
-      emit("success", response);
+      emit('success', response)
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("An error occurred");
+      const error = err instanceof Error ? err : new Error('An error occurred')
 
       toast.add({
-        title: "Booking failed",
+        title: 'Booking failed',
         description: error.message,
-        color: "error",
-      });
+        color: 'error',
+      })
 
-      emit("error", error);
+      emit('error', error)
     } finally {
-      isSubmitting.value = false;
+      isSubmitting.value = false
     }
   } else {
-    emit("submit", event.data);
+    emit('submit', event.data)
   }
-};
+}
 
 // Update form travelId when prop changes
 watch(
   () => props.travelId,
   (newTravelId) => {
-    form.travelId = newTravelId;
+    form.travelId = newTravelId
   },
   { immediate: true }
-);
+)
 
 // Adjust seats when available seats changes
 watch(
@@ -242,8 +221,8 @@ watch(
     form.seats = Math.min(
       form.seats,
       Math.max(1, Math.min(available, BOOKING_CONFIG.MAX_SEATS_PER_BOOKING))
-    );
+    )
   },
   { immediate: true }
-);
+)
 </script>

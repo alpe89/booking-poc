@@ -8,9 +8,7 @@
       :variant="remainingTime < warningThreshold ? 'solid' : 'outline'"
     >
       <template #title> Reservation expires in {{ formattedTime }} </template>
-      <template #description>
-        Complete your payment before the reservation expires
-      </template>
+      <template #description> Complete your payment before the reservation expires </template>
     </UAlert>
 
     <!-- EXPIRED alert -->
@@ -47,15 +45,15 @@
 
 <script setup lang="ts">
 type Props = {
-  status: string;
-  remainingTime?: number | null;
-  formattedTime?: string;
-  warningThreshold?: number;
-};
+  status: string
+  remainingTime?: number | null
+  formattedTime?: string
+  warningThreshold?: number
+}
 
 withDefaults(defineProps<Props>(), {
   remainingTime: null,
-  formattedTime: "0m 0s",
+  formattedTime: '0m 0s',
   warningThreshold: 300,
-});
+})
 </script>

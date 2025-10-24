@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { GetTravelsQuerySchema, type GetTravelsQuery, SlugSchema, type Slug } from '@booking/shared';
+import {
+  GetTravelsQuerySchema,
+  type GetTravelsQuery,
+  SlugSchema,
+  type Slug,
+} from '@booking/shared';
 
 // Re-export from shared package
 export { GetTravelsQuerySchema, type GetTravelsQuery, SlugSchema, type Slug };

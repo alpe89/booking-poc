@@ -12,26 +12,26 @@ export const useFormatters = () => {
    */
   const formatDate = (
     dateString: string,
-    locale: string = "it-IT",
+    locale: string = 'it-IT',
     options: Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     }
   ) => {
-    return new Date(dateString).toLocaleDateString(locale, options);
-  };
+    return new Date(dateString).toLocaleDateString(locale, options)
+  }
 
   /**
    * Format a date string to short format
    */
-  const formatDateShort = (dateString: string, locale: string = "it-IT") => {
+  const formatDateShort = (dateString: string, locale: string = 'it-IT') => {
     return formatDate(dateString, locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
 
   /**
    * Format price from cents to currency string
@@ -39,16 +39,12 @@ export const useFormatters = () => {
    * @param currency - Currency code (default: 'EUR')
    * @param locale - BCP 47 language tag (default: 'en-US')
    */
-  const formatPrice = (
-    cents: number,
-    currency: string = "EUR",
-    locale: string = "it-IT"
-  ) => {
+  const formatPrice = (cents: number, currency: string = 'EUR', locale: string = 'it-IT') => {
     return new Intl.NumberFormat(locale, {
-      style: "currency",
+      style: 'currency',
       currency,
-    }).format(cents / 100);
-  };
+    }).format(cents / 100)
+  }
 
   /**
    * Format seconds to minutes and seconds string (e.g., "5m 30s")
@@ -56,12 +52,12 @@ export const useFormatters = () => {
    */
   const formatTime = (seconds: number) => {
     if (seconds <= 0) {
-      return "0m 0s";
+      return '0m 0s'
     }
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}m ${secs}s`;
-  };
+    const minutes = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${minutes}m ${secs}s`
+  }
 
   /**
    * Format duration between two dates in days
@@ -69,14 +65,11 @@ export const useFormatters = () => {
    * @param endDate - End date string
    */
   const formatDuration = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const days = Math.max(
-      1,
-      Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-    );
-    return `${days} ${days === 1 ? "day" : "days"}`;
-  };
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const days = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+    return `${days} ${days === 1 ? 'day' : 'days'}`
+  }
 
   return {
     formatDate,
@@ -84,5 +77,5 @@ export const useFormatters = () => {
     formatPrice,
     formatTime,
     formatDuration,
-  };
-};
+  }
+}
