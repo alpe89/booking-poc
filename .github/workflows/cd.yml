@@ -83,13 +83,12 @@ jobs:
       - name: Setup database
         env:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
+          PGPASSWORD: booking_secret
         run: |
           pnpm --filter backend exec prisma migrate deploy
           pnpm --filter backend exec prisma db seed
           echo "Verifying seed data..."
-          pnpm --filter backend exec prisma db execute --stdin <<EOF
-          SELECT COUNT(*) as travel_count FROM travels;
-          EOF
+          psql -h localhost -U booking -d booking_db -c "SELECT COUNT(*) FROM travels;"
 
       - name: Run integration tests (backend)
         env:
