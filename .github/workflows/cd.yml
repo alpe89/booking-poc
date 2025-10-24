@@ -85,8 +85,11 @@ jobs:
           DATABASE_URL: postgresql://booking:booking_secret@localhost:5432/booking_db
           PGPASSWORD: booking_secret
         run: |
+          echo "Running migrations..."
           pnpm --filter backend exec prisma migrate deploy
-          pnpm --filter backend exec prisma db seed
+          echo "Running seed..."
+          cd packages/backend && DATABASE_URL=$DATABASE_URL pnpm exec prisma db seed
+          cd ../..
           echo "Verifying seed data..."
           psql -h localhost -U booking -d booking_db -c "SELECT COUNT(*) FROM travels;"
 
