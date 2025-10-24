@@ -86,6 +86,10 @@ jobs:
         run: |
           pnpm --filter backend exec prisma migrate deploy
           pnpm --filter backend exec prisma db seed
+          echo "Verifying seed data..."
+          pnpm --filter backend exec prisma db execute --stdin <<EOF
+          SELECT COUNT(*) as travel_count FROM travels;
+          EOF
 
       - name: Run integration tests (backend)
         env:
